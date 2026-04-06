@@ -9,6 +9,9 @@ Cat-ime is a sleek, completely standalone client-side streaming architecture bui
 - **My List Persistence**: Directly syncs custom user states (Watching, Dropped, Paused) against active database items spanning exactly across the application tracking grids.
 - **Strict Race-Condition Safeguards**: Custom request handlers strictly intercepting redundant REST calls preventing caching overrides during live searches.
 
+## How to use?
+Watch all the anime you want here!: https://thecosmiccat.github.io/cat-ime/
+
 ## 🎥 Application Walkthrough
 Watch the core layout features dynamically render from boot to playback execution below!
 
