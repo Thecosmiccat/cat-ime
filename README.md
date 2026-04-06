@@ -10,6 +10,8 @@ Cat-ime is a sleek, completely standalone client-side streaming architecture bui
 - **Strict Race-Condition Safeguards**: Custom request handlers strictly intercepting redundant REST calls preventing caching overrides during live searches.
 
 ## How to use?
+Its best to use a ad-blocker due to the embed having redirect ads
+
 Watch all the anime you want here!: https://thecosmiccat.github.io/cat-ime/
 
 ## 🎥 Application Walkthrough
