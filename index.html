@@ -1073,9 +1073,29 @@
     width: 4px
   }
 
-  ::-webkit-scrollbar-thumb {
     background: var(--bg4);
     border-radius: 10px
+  }
+
+  .footer {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    color: var(--text3);
+    font-size: 0.78rem;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+  }
+
+  .footer a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: filter 0.2s;
+  }
+
+  .footer a:hover {
+    filter: brightness(1.2);
+    text-decoration: underline;
   }
 </style>
 
@@ -1220,6 +1240,10 @@
 
 <div id="toast"></div>
 
+<footer class="footer">
+  Made by <a href="https://github.com/Thecosmiccat" target="_blank">Thecosmiccat</a> >⩊<
+</footer>
+
 <script>
   // DB removed in favor of direct AniList Graph API calls
 
@@ -1349,7 +1373,7 @@
       }
     }
   }`;
-    const variables = { page: 1, perPage: 24 };
+    const variables = { page: 1, perPage: 50 };
     if (query) variables.search = query;
     if (genre && genre !== 'dubbed') {
       if (genre === 'sci-fi') variables.genre = 'Sci-Fi';
@@ -1672,7 +1696,7 @@
 
   async function loadTrending() {
     const res = await searchAnilist('', '');
-    renderGrid('homeGrid', res.slice(0, 12));
+    renderGrid('homeGrid', res.slice(0, 50));
     initHeroSlider(res);
   }
   loadTrending();
