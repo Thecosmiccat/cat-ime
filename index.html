@@ -1251,8 +1251,7 @@
       <div class="player-box" id="playerBox">
         <div class="player-ph">
           <div class="pi">▶</div>
-          <div style="font-size:0.82rem">Select an episode to watch</div>
-          <div style="font-size:0.68rem;margin-top:0.2rem;color:var(--text3)">Powered by player.videasy.net</div>
+          <div style="font-size:0.82rem">Select an anime and episode to watch</div>
         </div>
       </div>
       <div class="ep-meta">
@@ -1319,7 +1318,7 @@
         if (idx[id] !== undefined) document.querySelectorAll('.nl')[idx[id]].classList.add('active');
 
         if (id !== 'watch') {
-          document.getElementById('playerBox').innerHTML = `<div class="player-ph"><div class="pi">▶</div><div style="font-size:0.82rem">Select an episode to watch</div><div style="font-size:0.68rem;margin-top:0.2rem;color:var(--text3)">Powered by player.videasy.net</div></div>`;
+        
         }
         if (id === 'home') loadCW();
       }
