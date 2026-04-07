@@ -1224,7 +1224,7 @@
           <path d="m21 21-4.35-4.35" />
         </svg></div>
       <input class="si" id="searchInput" type="text" placeholder="Search by title, genre, year..."
-        oninput="doSearch(this.value)">
+        oninput="debouncedSearch(this.value)">
     </div>
     <div class="filters">
       <div class="fp on" onclick="setGenre(this,'')">All</div>
@@ -1317,7 +1317,6 @@
         if (idx[id] !== undefined) document.querySelectorAll('.nl')[idx[id]].classList.add('active');
 
         if (id !== 'watch') {
-        
         }
         if (id === 'home') loadCW();
       }
@@ -1353,7 +1352,7 @@
       airingSchedules (sort: TIME_DESC, airingAt_lesser: $less, mediaId_in: $ids) {
         episode
         airingAt
-        media { id idMal title { english romaji } coverImage { large } format }
+        media { id idMal title { english romaji } coverImage { large } format isAdult }
       }
     }
   }`;
@@ -1375,7 +1374,7 @@
         const lastRead = localStorage.getItem('lastReadNotif') || 0;
 
         items.forEach(it => {
-          if (it.media.format === 'MOVIE') return;
+          if (it.media.format === 'MOVIE' || it.media.isAdult) return;
           const isUnread = it.airingAt > lastRead;
           if (isUnread) unreadCount++;
           const t = it.media.title.english || it.media.title.romaji;
@@ -1452,7 +1451,7 @@
         currentPage
         hasNextPage
       }
-      media (search: $search, genre: $genre, type: ANIME, sort: [TRENDING_DESC]) {
+      media (search: $search, genre: $genre, type: ANIME, sort: [TRENDING_DESC], isAdult: false) {
         id
         idMal
         title { romaji english }
@@ -1493,6 +1492,13 @@
 
       let searchSeq = 0;
       let defaultSearchData = null;
+      let searchDebounceTimer = null;
+
+      function debouncedSearch(q) {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => doSearch(q), 600);
+      }
+
       async function doSearch(q) {
         const seq = ++searchSeq;
         q = q.trim();
@@ -1536,12 +1542,12 @@
       async function fetchSeasons(id) {
         const sel = document.getElementById('seasonSelect');
         sel.style.display = 'none';
-        const q = `query($id: Int){ Media(id: $id) { title { english romaji } relations { edges { relationType node { id title { romaji english } format episodes coverImage { large } } } } } }`;
+        const q = `query($id: Int){ Media(id: $id) { title { english romaji } relations { edges { relationType node { id title { romaji english } format episodes coverImage { large } isAdult } } } } }`;
         try {
           const res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, variables: { id } }) });
           const d = await res.json();
           if (d.data) {
-            const rels = d.data.Media.relations.edges.filter(e => ['PREQUEL', 'SEQUEL', 'ALTERNATIVE'].includes(e.relationType) && e.node.format === 'TV');
+            const rels = d.data.Media.relations.edges.filter(e => ['PREQUEL', 'SEQUEL', 'ALTERNATIVE'].includes(e.relationType) && e.node.format === 'TV' && !e.node.isAdult);
             if (rels.length === 0) return;
             const selfTitle = (d.data.Media.title.english || d.data.Media.title.romaji).replace(/'/g, "");
             let html = `<option value="${curAnime.id}" selected>Season: ${selfTitle}</option>`;
@@ -1591,7 +1597,7 @@
         if (!tbody) return;
         if (!f.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3)">No anime in your list. Start following some!</td></tr>'; return; }
 
-        const q = `query($ids: [Int]){ Page(page:1, perPage:50){ media(id_in: $ids){ id idMal title { english romaji } episodes averageScore coverImage { large } } } }`;
+        const q = `query($ids: [Int]){ Page(page:1, perPage:50){ media(id_in: $ids, isAdult: false){ id idMal title { english romaji } episodes averageScore coverImage { large } } } }`;
         try {
           const res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, variables: { ids: f } }) });
           const d = await res.json();
@@ -1677,7 +1683,7 @@
         if (!cw.length) { grid.innerHTML = '<div style="font-size:0.8rem;color:var(--text3);padding:1rem 0">No continue watching history available. Start watching some anime!</div>'; return; }
 
         const ids = cw.map(x => x.id);
-        const q = `query($ids: [Int]){ Page(page:1, perPage:10){ media(id_in: $ids){ id idMal title { english romaji } episodes averageScore coverImage { large } } } }`;
+        const q = `query($ids: [Int]){ Page(page:1, perPage:10){ media(id_in: $ids, isAdult: false){ id idMal title { english romaji } episodes averageScore coverImage { large } } } }`;
         try {
           const res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, variables: { ids } }) });
           const d = await res.json();
