@@ -1156,6 +1156,7 @@
 
 <nav>
   <span class="logo" onclick="goPage('home')">cat-ime ฅ^>⩊<^ ฅ</span>
+  <!-- um, the emoticon in the title might fuck up on sume devices -->
       <div class="nav-links">
         <button class="nl active" onclick="goPage('home')">Home</button>
         <button class="nl" onclick="goPage('search')">Search</button>
@@ -1207,6 +1208,7 @@
         →</span></div>
     <div class="grid" id="homeGrid"></div>
     <div class="grid-feed-status" id="homeTrendingStatus">Loading trending anime...</div>
+    <!-- my failed attempt at implementing infinite scroll because its not infinite   -->
     <div id="homeTrendingSentinel" aria-hidden="true"></div>
   </div>
 </div>
@@ -1396,6 +1398,8 @@
     </div>`;
         });
 
+        // yo anilist, if you're reading this, please add a notifications endpoint so I don't have to do this dumb
+
         document.getElementById('ndot').style.display = unreadCount > 0 ? 'block' : 'none';
       };
 
@@ -1412,6 +1416,7 @@
         card.innerHTML = `<div class="acard-thumb">${imgEl}<div class="thumb-ov"><div class="play-chip"><div class="play-tri"></div></div></div>${badge}</div><div class="acard-info"><div class="acard-title" title="${a.title}">${a.title}</div><div class="acard-meta"><span class="score">★ ${a.score}</span><span>${a.eps} ep</span></div></div>`;
         card.onclick = () => watchAnime(a);
         return card;
+        // the sub and dub badge code is a bit jank ngl but it works and looks decent enough so ¯\_(ツ)_/¯
       }
 
       function appendGrid(id, list, animate = false) {
@@ -1423,6 +1428,7 @@
             card.style.animationDelay = `${Math.min(idx * 45, 360)}ms`;
           }
           el.appendChild(card);
+          // CHILL OUT ANILIST, I'M NOT LOADING 1000 ANIME AT ONCE, STOP FUCKING UP MY ANIMATION DELAYS WITH YOUR SHITTY PAGINATION
         });
       }
 
@@ -1430,6 +1436,8 @@
         const el = document.getElementById(id);
         el.innerHTML = '';
         if (!list.length) { el.innerHTML = '<div class="empty-s">No results found</div>'; return; }
+        // aka you searched for some really obscure anime that doesn't exist on anilist, nice try :P
+        // or u just got rate limited because
         appendGrid(id, list);
       }
 
@@ -1702,6 +1710,7 @@
         b.classList.toggle('on', autoNext);
         toast(autoNext ? 'Auto Next on' : 'Auto Next off');
       }
+      // holy shit this somehow works
 
       function goNextEpisode() {
         if (!curAnime) return;
@@ -1732,7 +1741,7 @@
         document.getElementById('watchTitle').textContent = curAnime ? curAnime.title : 'Anime';
         document.getElementById('watchMeta').textContent = `Episode ${idx} of ${total} · ${curDS.toUpperCase()}`;
 
-        const url = `https://player.videasy.net/anime/${malId}/${epNum}`;
+        const url = `https://player.videasy.net/anime/${malId}/${epNum}?color=4169e1`;
         // holy i hate this format for episode urls but videasy api is really good so who cares :P
         document.getElementById('playerBox').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${epTitle}"></iframe>`;
         markWatched(malId, epNum);
