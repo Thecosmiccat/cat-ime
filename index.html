@@ -1261,6 +1261,7 @@
               id="dsDub" onclick="setDS('dub')">DUB</button></div>
           <button class="mkb" id="btnW" onclick="toggleMk('btnW')">✓ Watched</button>
           <button class="mkb" id="btnFollow" onclick="toggleFollow()">🔔 Follow</button>
+          <button class="mkb" id="btnAutoNext" onclick="toggleAutoNext()" title="Auto Next Episode">⏭ Auto Next</button>
         </div>
       </div>
     </div>
@@ -1646,13 +1647,45 @@
         }
       }
 
+      let autoNext = false;
+
+      function toggleAutoNext() {
+        autoNext = !autoNext;
+        const b = document.getElementById('btnAutoNext');
+        b.classList.toggle('on', autoNext);
+        toast(autoNext ? 'Auto Next on' : 'Auto Next off');
+      }
+
+      function goNextEpisode() {
+        if (!curAnime) return;
+        const total = curAnime.eps || 1;
+        if (curEp >= total) { toast('No next episode'); return; }
+        const nextEp = curEp + 1;
+        const epItems = document.querySelectorAll('.epi');
+        if (epItems[nextEp - 1]) epItems[nextEp - 1].click();
+      }
+
+      window.addEventListener('message', (e) => {
+        if (!autoNext) return;
+        const d = e.data;
+        if (!d) return;
+        // Handle various player message formats
+        const isEnded =
+          d === 'ended' ||
+          d.event === 'ended' ||
+          d.type === 'ended' ||
+          d.type === 'VIDEO_ENDED' ||
+          d.type === 'complete' ||
+          (typeof d === 'string' && d.includes('ended'));
+        if (isEnded) goNextEpisode();
+      });
+
       function loadPlayer(malId, epNum, epTitle, idx, total) {
         curEp = epNum;
         document.getElementById('watchTitle').textContent = curAnime ? curAnime.title : 'Anime';
         document.getElementById('watchMeta').textContent = `Episode ${idx} of ${total} · ${curDS.toUpperCase()}`;
 
-        const url = `https://player.videasy.net/anime/${malId}/${epNum}?autoPlay=1&color=2563eb&dub=${curDS === 'dub' ? 1 : 0}`;
-
+        const url = `https://player.videasy.net/anime/${malId}/${epNum}?autoPlay=1&color=2563eb&dub=${curDS === 'dub' ? 1 : 0}&nextEpisode=1`;
         document.getElementById('playerBox').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${epTitle}"></iframe>`;
         markWatched(malId, epNum);
 
