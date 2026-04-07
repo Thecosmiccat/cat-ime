@@ -1534,10 +1534,31 @@
         goPage('watch');
         document.getElementById('watchTitle').textContent = a.title;
         document.getElementById('watchMeta').textContent = 'Loading episodes...';
-        buildEpList(a, epCount);
+        buildEpList(a, epCount, []);
         loadPlayer(a.id, 1, 'Episode 1', 1, epCount);
         updateFollowBtn();
         fetchSeasons(a.id);
+        fetchEpisodeTitles(a.id, a, epCount);
+      }
+
+      async function fetchEpisodeTitles(id, a, epCount) {
+        const malId = a.malId || a.idMal;
+        if (!malId) return;
+        try {
+          const pages = Math.ceil(epCount / 100);
+          let allEps = [];
+          for (let p = 1; p <= Math.min(pages, 5); p++) {
+            const res = await fetch(`https://api.jikan.moe/v4/anime/${malId}/episodes?page=${p}`);
+            const d = await res.json();
+            if (!d.data) break;
+            allEps = allEps.concat(d.data);
+            if (!d.pagination?.has_next_page) break;
+          }
+          if (!allEps.length) return;
+          if (curAnime && curAnime.id === id) {
+            buildEpList(a, epCount, allEps);
+          }
+        } catch (e) { }
       }
 
       async function fetchSeasons(id) {
@@ -1627,7 +1648,7 @@
         if (curAnime && curAnime.id === id) updateFollowBtn();
       }
 
-      function buildEpList(a, epCount) {
+      function buildEpList(a, epCount, epTitles = []) {
         const list = document.getElementById('epList');
         list.innerHTML = '';
         const total = epCount;
@@ -1636,14 +1657,25 @@
         for (let i = 1; i <= total; i++) {
           const item = document.createElement('div');
           item.className = 'epi' + (watched.has(i) ? ' done' : '') + (i === 1 ? ' cur' : '');
-          item.innerHTML = `<div class="en">${String(i).padStart(2, '0')}</div><div class="ei"><div class="enm">Episode ${i}</div></div>${watched.has(i) ? '<div class="etick">✓</div>' : ''}`;
+          
+          let rawTitle = epTitles[i - 1] ? (epTitles[i - 1].title || '') : '';
+          rawTitle = rawTitle.replace(/^Episode\s+\d+\s*[-:–]\s*/i, '').trim();
+          const epLabel = rawTitle || `Episode ${i}`;
+          
           const epN = i;
+          item.innerHTML = `<div class="en">${String(i).padStart(2, '0')}</div><div class="ei"><div class="enm" title="${epLabel}">${epLabel}</div></div>${watched.has(i) ? '<div class="etick">✓</div>' : ''}`;
           item.onclick = () => {
             document.querySelectorAll('.epi').forEach(e => e.classList.remove('cur'));
             item.classList.add('cur');
-            loadPlayer(a.id, epN, 'Episode ' + epN, epN, total);
+            loadPlayer(a.id, epN, epLabel, epN, total);
           };
           list.appendChild(item);
+        }
+        // Restore current episode highlight
+        const items = list.querySelectorAll('.epi');
+        if (items[curEp - 1]) {
+          items.forEach(e => e.classList.remove('cur'));
+          items[curEp - 1].classList.add('cur');
         }
       }
 
