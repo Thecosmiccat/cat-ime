@@ -1300,9 +1300,12 @@
 
 <footer class="footer">
   Made by <a href="https://github.com/Thecosmiccat" target="_blank">Thecosmiccat</a> >⩊< </footer>
+  <!-- Ya i added a cat emoticon in the footer deal with it :P -->
 
     <script>
       // DB removed in favor of direct AniList Graph API calls
+      // Wtf was I thinking adding a local DB in a client-side app lmao
+      // well at least the code is cleaner now :)
 
       let curAnime = null;
       let curEp = 1;
@@ -1357,6 +1360,7 @@
       }
     }
   }`;
+  // no more nsfw anime notifications for you, sorry not sorry :P
         try {
           const res = await fetch('https://graphql.anilist.co', {
             method: 'POST',
@@ -1462,6 +1466,8 @@
         }
     }
   }`;
+  // no more nsfw anime search results for you, sorry not sorry :P
+
         const variables = { page, perPage };
         if (query) variables.search = query;
         if (genre && genre !== 'dubbed') {
@@ -1549,6 +1555,7 @@
           let allEps = [];
           for (let p = 1; p <= Math.min(pages, 5); p++) {
             const res = await fetch(`https://api.jikan.moe/v4/anime/${malId}/episodes?page=${p}`);
+            // yup jikan api for episode titles, no anilist endpoint for this :(
             const d = await res.json();
             if (!d.data) break;
             allEps = allEps.concat(d.data);
@@ -1584,6 +1591,7 @@
           }
         } catch (e) { }
       }
+      // wtf is this spaghetti code for handling season switching? yes. yes it is. but it works so who cares :P
 
       function switchSeason(val) {
         if (val === String(curAnime.id)) return;
@@ -1602,6 +1610,8 @@
         fetchNotifications();
       }
 
+      // also spaghetti code for follow button state management, sue me :P
+
       function updateFollowBtn() {
         if (!curAnime) return;
         let f = JSON.parse(localStorage.getItem('followed') || '[]');
@@ -1613,6 +1623,7 @@
         }
       }
 
+
       async function loadMyList() {
         const f = JSON.parse(localStorage.getItem('followed') || '[]');
         const tbody = document.querySelector('.lt tbody');
@@ -1620,6 +1631,7 @@
         if (!f.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3)">No anime in your list. Start following some!</td></tr>'; return; }
 
         const q = `query($ids: [Int]){ Page(page:1, perPage:50){ media(id_in: $ids, isAdult: false){ id idMal title { english romaji } episodes averageScore coverImage { large } } } }`;
+        // no more nsfw anime in your list, sorry not sorry :P
         try {
           const res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, variables: { ids: f } }) });
           const d = await res.json();
@@ -1730,6 +1742,8 @@
         }
       }
 
+      // Thank you Videasy for providing the anime streaming API for free, you're the real MVP <3
+
       function markWatched(id, ep) {
         ep = Number(ep);
         const k = 'w_' + id;
@@ -1815,6 +1829,9 @@
         { cls: 'sd', label: '✕ Dropped' },
         { cls: 'sh', label: '⏸ Paused' }
       ];
+      // also spaghetti code for status cycling in the list, sue me again :P
+      // how tf did this even turn into a full blown anime streaming site with all these features? I just wanted to make a simple anilist client at first lmao
+
       function cycleS(btn) {
         const badge = btn.closest('tr').querySelector('.sb2');
         const cur = statuses.findIndex(s => badge.classList.contains(s.cls));
@@ -1878,6 +1895,8 @@
           setTrendingStatus('Loading more trending anime...');
         }
 
+        // this is going to be so rate limited but idc, at least it will load something for the users instead of just showing an error message :P
+
         trendingLoading = true;
         const { items, hasNextPage } = await fetchAnilistPage('', '', trendingPage, 25);
         const freshItems = items.filter(item => {
@@ -1895,14 +1914,15 @@
         trendingLoading = false;
 
         if (!document.getElementById('homeGrid').children.length) {
-          setTrendingStatus('Could not load trending anime right now.');
+          setTrendingStatus('Could not load trending anime right now. (Probably due to rate limits, but who knows with these APIs :P) Try refreshing the page?');
           return;
         }
 
         if (!trendingHasNextPage) {
-          setTrendingStatus('You reached the end of the trending list.');
+          setTrendingStatus('You reached the end of the trending list, pick sum already! :)');
           return;
         }
+        // only indecisive anime fans would complain about not having more than 100 trending anime to scroll through anyway :P
 
         setTrendingStatus('Scroll for more trending anime');
       }
@@ -1930,3 +1950,5 @@
       loadMyList();
       loadCW();
     </script>
+
+    <!-- Yo is anyone acually reading this? -->
