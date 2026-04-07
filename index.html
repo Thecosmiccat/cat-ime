@@ -36,7 +36,9 @@
     top: 0;
     z-index: 100;
     background: rgba(10, 10, 15, 0.97);
+    backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     padding: 0 1.5rem;
     height: 54px;
     display: flex;
@@ -63,7 +65,7 @@
     font-size: 0.82rem;
     font-weight: 500;
     padding: 0.32rem 0.8rem;
-    border-radius: 7px;
+    border-radius: 10px;
     cursor: pointer;
     color: var(--text2);
     border: none;
@@ -1130,10 +1132,6 @@
     width: 4px
   }
 
-  background: var(--bg4);
-  border-radius: 10px
-  }
-
   .footer {
     text-align: center;
     padding: 2.5rem 1.5rem;
@@ -1351,9 +1349,9 @@
           return;
         }
         const q = `
-  query ($less: Int, $ids: [Int]) {
-    Page (page: 1, perPage: 10) {
-      airingSchedules (sort: TIME_DESC, airingAt_lesser: $less, mediaId_in: $ids) {
+  query ($greater: Int, $ids: [Int]) {
+    Page (page: 1, perPage: 1) {
+      airingSchedules (sort: TIME, airingAt_greater: $greater, mediaId_in: $ids) {
         episode
         airingAt
         media { id idMal title { english romaji } coverImage { large } format isAdult }
@@ -1365,7 +1363,7 @@
           const res = await fetch('https://graphql.anilist.co', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: q, variables: { less: Math.floor(Date.now() / 1000), ids: f } })
+            body: JSON.stringify({ query: q, variables: { greater: Math.floor(Date.now() / 1000), ids: f } })
           });
           const data = await res.json();
           if (data.data) renderNotifications(data.data.Page.airingSchedules);
@@ -1383,14 +1381,18 @@
           const isUnread = it.airingAt > lastRead;
           if (isUnread) unreadCount++;
           const t = it.media.title.english || it.media.title.romaji;
-          const since = Math.floor((Date.now() / 1000 - it.airingAt) / 60);
-          const timeStr = since < 60 ? since + 'm ago' : Math.floor(since / 60) + 'h ago';
+          const since = Math.floor((it.airingAt - Date.now() / 1000) / 60);
+          let timeStr;
+          if (since <= 0) timeStr = 'soon';
+          else if (since < 60) timeStr = `in ${since}m`;
+          else if (since < 1440) timeStr = `in ${Math.floor(since / 60)}h`;
+          else timeStr = `in ${Math.floor(since / 1440)}d`;
 
           const obj = { id: it.media.id, malId: it.media.idMal, title: t.replace(/'/g, "\\'"), eps: 24, dubbed: true, img: it.media.coverImage.large };
 
           list.innerHTML += `<div class="ni ${isUnread ? 'unread' : ''}" onclick="watchAnime({id:${obj.id},malId:${obj.malId || obj.id},title:'${obj.title}',eps:24,dubbed:true})">
       ${isUnread ? '<div class="nid"></div>' : '<div style="width:6px;flex-shrink:0"></div>'}
-      <div><div class="nit"><strong>${t}</strong> Ep ${it.episode} just dropped!</div><div class="nts">${timeStr}</div></div>
+      <div><div class="nit"><strong>${t}</strong> Ep ${it.episode} airing soon!</div><div class="nts">${timeStr}</div></div>
     </div>`;
         });
 
@@ -1441,7 +1443,7 @@
           id: m.id,
           malId: m.idMal,
           title: m.title.english || m.title.romaji || "Unknown Title",
-          eps: m.episodes || 24,
+          eps: m.nextAiringEpisode ? m.nextAiringEpisode.episode - 1 : m.episodes || 24,
           score: m.averageScore ? (m.averageScore / 10).toFixed(1) : '?',
           img: m.coverImage.large,
           dubbed: true
@@ -1461,6 +1463,7 @@
         idMal
         title { romaji english }
         episodes
+        nextAiringEpisode { episode }
         averageScore
         coverImage { large }
         }
@@ -1553,7 +1556,7 @@
         try {
           const pages = Math.ceil(epCount / 100);
           let allEps = [];
-          for (let p = 1; p <= Math.min(pages, 5); p++) {
+          for (let p = 1; p <= Math.min(pages, 15); p++) {
             const res = await fetch(`https://api.jikan.moe/v4/anime/${malId}/episodes?page=${p}`);
             // yup jikan api for episode titles, no anilist endpoint for this :(
             const d = await res.json();
@@ -1729,7 +1732,8 @@
         document.getElementById('watchTitle').textContent = curAnime ? curAnime.title : 'Anime';
         document.getElementById('watchMeta').textContent = `Episode ${idx} of ${total} · ${curDS.toUpperCase()}`;
 
-        const url = `https://player.videasy.net/anime/${malId}/${epNum}?autoplay=true&color=2563eb&nextEpisode=true`;
+        const url = `https://player.videasy.net/anime/${malId}/${epNum}`;
+        // holy i hate this format for episode urls but videasy api is really good so who cares :P
         document.getElementById('playerBox').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${epTitle}"></iframe>`;
         markWatched(malId, epNum);
 
