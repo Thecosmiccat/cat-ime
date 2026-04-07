@@ -1729,7 +1729,7 @@
         document.getElementById('watchTitle').textContent = curAnime ? curAnime.title : 'Anime';
         document.getElementById('watchMeta').textContent = `Episode ${idx} of ${total} · ${curDS.toUpperCase()}`;
 
-        const url = `https://player.videasy.net/anime/${malId}/${epNum}?autoPlay=1&color=2563eb&dub=${curDS === 'dub' ? 1 : 0}&nextEpisode=1`;
+        const url = `https://player.videasy.net/anime/${malId}/${epNum}?autoplay=true&color=2563eb&nextEpisode=true`;
         document.getElementById('playerBox').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${epTitle}"></iframe>`;
         markWatched(malId, epNum);
 
