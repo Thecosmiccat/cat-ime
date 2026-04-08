@@ -35,12 +35,11 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(10, 10, 15, 0.97);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background: rgba(26, 37, 48, 0.96);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(76, 161, 175, 0.15);
     padding: 0 1.5rem;
-    height: 54px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -49,38 +48,52 @@
 
   .logo {
     font-family: 'Syne', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 800;
-    color: var(--accent);
+    background: linear-gradient(135deg, var(--accent), #7ecdd6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     cursor: pointer;
-    flex-shrink: 0
+    flex-shrink: 0;
+    letter-spacing: -0.01em
   }
 
   .nav-links {
     display: flex;
-    gap: 2px
+    gap: 4px
   }
 
   .nl {
-    font-size: 0.82rem;
-    font-weight: 500;
-    padding: 0.32rem 0.8rem;
-    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.42rem 1rem;
+    border-radius: 8px;
     cursor: pointer;
-    color: var(--text2);
+    color: var(--text3);
     border: none;
     background: none;
-    transition: all 0.15s
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1)
   }
 
-  .nl:hover,
-  .nl.active {
+  .nl:hover {
     color: var(--text);
-    background: var(--bg3)
+    background: rgba(76, 161, 175, 0.1);
+    transform: translateY(-1px)
   }
 
   .nl.active {
-    color: var(--accent)
+    color: #fff;
+    background: var(--accent);
+    box-shadow: 0 2px 14px rgba(76, 161, 175, 0.35)
+  }
+
+  .nl.active:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 18px rgba(76, 161, 175, 0.45)
   }
 
   .nav-r {
@@ -1744,8 +1757,7 @@
         document.getElementById('watchTitle').textContent = curAnime ? curAnime.title : 'Anime';
         document.getElementById('watchMeta').textContent = `Episode ${idx} of ${total} · ${curDS.toUpperCase()}`;
 
-        const url = `https://player.videasy.net/anime/${malId}/${epNum}?color=4169e1`;
-        // holy i hate this format for episode urls but videasy api is really good so who cares :P
+        const url = `https://player.videasy.net/anime/${malId}/${epNum}?color=4ca1af`;
         document.getElementById('playerBox').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${epTitle}"></iframe>`;
         markWatched(malId, epNum);
 
@@ -1759,6 +1771,7 @@
       }
 
       // Thank you Videasy for providing the anime streaming API for free, you're the real MVP <3
+      // NVM FUCK YOU VIDEASY, U JUST GET CANSER THE SEC I CHENGE THE UI
 
       function markWatched(id, ep) {
         ep = Number(ep);
@@ -1877,6 +1890,7 @@
           const div = document.createElement('div');
           div.className = 'hero-slide' + (i === 0 ? ' active' : '');
           div.style.backgroundImage = `url(${item.banner || item.img})`;
+          // Yoooo no more pixalated backgrond banner yippe
           el.appendChild(div);
         });
         heroTimer = setInterval(() => {
