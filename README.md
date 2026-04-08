@@ -14,7 +14,7 @@ Its best to use a ad-blocker due to the embed having redirect ads
 
 Watch all the anime you want here!: https://thecosmiccat.github.io/cat-ime/
 
-## 🎥 Application Walkthrough
+## 🎥 Application Walkthrough (OUTDATED)
 Watch the core layout features dynamically render from boot to playback execution below!
 
 ![Testing Flow Demo](demo.webp)
