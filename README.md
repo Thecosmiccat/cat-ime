@@ -1,20 +1,22 @@
-# 🐾 Cat-ime
+# 🐾Cat-ime
 
-Cat-ime is a sleek, completely standalone client-side streaming architecture built seamlessly upon the AniList GraphQL network and Videasy streaming cores.
+A cat-themed anime streaming app — fully standalone, no backend, no build step. 
 
-## 🚀 Key Features
-- **Dynamic Trending Background**: Automatically hosts the top currently trending anime banners scaling beautifully across the application hero layout via CSS masking.
-- **AniList Database Engine**: Blazingly fast real-time queries capable of pulling titles, absolute episode bounds, and cover artwork flawlessly mapped against the AniList schema.
-- **Instant Continue Watching**: Effortlessly maps linear episode progressions locally via hardware `localStorage` caching, producing an organized, interactive resume board.
-- **My List Persistence**: Directly syncs custom user states (Watching, Dropped, Paused) against active database items spanning exactly across the application tracking grids.
-- **Strict Race-Condition Safeguards**: Custom request handlers strictly intercepting redundant REST calls preventing caching overrides during live searches.
+Just go to: https://thecosmiccat.github.io/cat-ime/
 
-## How to use?
-Its best to use a ad-blocker due to the embed having redirect ads
+## Features
 
-Watch all the anime you want here!: https://thecosmiccat.github.io/cat-ime/
+- **Trending & Search** — pulls live data from the AniList GraphQL API including titles, episode counts, and banner artwork
+- **Dual Player Support** — stream via Videasy or Vidnest with persistent source preference
+- **Sub / Dub Toggle** — switch audio track per-session, preference saved across refreshes
+- **Auto Next Episode** — automatically advances to the next episode when one finishes
+- **Continue Watching** — resumes from where you left off using local storage
+- **My List** — track anime with Watching, Paused, and Dropped statuses
+- **Follow & Notifications** — follow shows and get notified when new episodes drop
 
-## 🎥 Application Walkthrough (OUTDATED)
-Watch the core layout features dynamically render from boot to playback execution below!
+## things used
 
-![Testing Flow Demo](demo.webp)
+- Vanilla HTML/CSS/JS — single file, zero dependencies
+- [AniList GraphQL API](https://anilist.gitbook.io/anilist-apiv2-docs/) for anime metadata
+- [Jikan API](https://jikan.moe/) for episode titles
+- [Videasy](https://videasy.net/) and [Vidnest](https://vidnest.fun/) for streaming
