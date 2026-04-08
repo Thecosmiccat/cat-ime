@@ -1327,7 +1327,16 @@
       let curGenre = '';
       let loggedIn = false;
 
+      let pausedSrc = null;
       function goPage(id) {
+        const iframe = document.querySelector('#playerBox iframe');
+        if (id !== 'watch' && iframe) {
+          pausedSrc = iframe.src;
+          iframe.src = 'about:blank';
+        } else if (id === 'watch' && pausedSrc) {
+          if (iframe) iframe.src = pausedSrc;
+          pausedSrc = null;
+        }
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nl').forEach(n => n.classList.remove('active'));
         document.getElementById('page-' + id).classList.add('active');
