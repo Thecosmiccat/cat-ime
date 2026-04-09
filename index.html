@@ -1166,6 +1166,127 @@
     filter: brightness(1.2);
     text-decoration: underline;
   }
+
+  /* ── VISUAL ENHANCEMENTS ── */
+
+  /* Smooth page enter animation */
+  .page.active { animation: pageIn 0.32s cubic-bezier(0.4,0,0.2,1) forwards; }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scrollbar theming */
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(76,161,175,0.28); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(76,161,175,0.52); }
+
+  /* Card hover glows */
+  .acard:hover { box-shadow: 0 8px 28px rgba(76,161,175,0.18), 0 2px 8px rgba(0,0,0,0.35); }
+  .cw-card:hover { box-shadow: 0 8px 28px rgba(76,161,175,0.14), 0 2px 8px rgba(0,0,0,0.3); }
+
+  /* Nav active glow */
+  .nl.active { box-shadow: 0 0 20px rgba(76,161,175,0.48), 0 2px 8px rgba(76,161,175,0.22); }
+  .nl.active:hover { box-shadow: 0 0 26px rgba(76,161,175,0.6), 0 4px 14px rgba(76,161,175,0.28); }
+
+  /* Notification dot pulse ring */
+  @keyframes ndotPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(76,161,175,0.7); }
+    50% { box-shadow: 0 0 0 5px rgba(76,161,175,0); }
+  }
+  #ndot { animation: ndotPulse 2s ease infinite; }
+
+  /* Hero tag breathing glow */
+  .hero-tag { animation: tagGlow 4s ease-in-out infinite; }
+  @keyframes tagGlow {
+    0%,100% { box-shadow: 0 0 10px rgba(76,161,175,0.08); }
+    50% { box-shadow: 0 0 22px rgba(76,161,175,0.25), 0 0 40px rgba(76,161,175,0.08); }
+  }
+
+  /* Hero title subtle glow */
+  .htitle { text-shadow: 0 2px 40px rgba(76,161,175,0.15); }
+
+  /* Primary button glow + lift */
+  .btn-p { box-shadow: 0 4px 18px rgba(76,161,175,0.3); }
+  .btn-p:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(76,161,175,0.25); }
+
+  /* Ghost button lift */
+  .btn-g { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+  .btn-g:hover { transform: translateY(-1px); }
+
+  /* Search focus glow */
+  .si:focus {
+    box-shadow: 0 0 0 3px rgba(76,161,175,0.14), 0 4px 14px rgba(0,0,0,0.1);
+    border-color: rgba(76,161,175,0.55) !important;
+  }
+
+  /* Active filter glow */
+  .fp.on { box-shadow: 0 0 14px rgba(76,161,175,0.2); }
+
+  /* Current episode left accent bar */
+  .epi.cur {
+    border-left: 2px solid var(--accent) !important;
+    padding-left: calc(0.65rem - 2px) !important;
+  }
+
+  /* Toast slide-up animation */
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Player glow when active */
+  .player-box:has(iframe) {
+    box-shadow: 0 0 40px rgba(76,161,175,0.1), 0 0 0 1px rgba(76,161,175,0.12);
+  }
+
+  /* Play chip accent tint on hover */
+  .thumb-ov:hover .play-chip {
+    background: linear-gradient(135deg, rgba(76,161,175,0.4), rgba(76,161,175,0.15));
+    box-shadow: 0 0 28px rgba(76,161,175,0.5), 0 14px 34px rgba(0,0,0,0.25);
+  }
+
+  /* Modal backdrop blur */
+  .modal-wrap.open { backdrop-filter: blur(6px); }
+  .modal { box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(76,161,175,0.08); }
+
+  /* Notification panel glass */
+  .np {
+    backdrop-filter: blur(16px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(76,161,175,0.08);
+  }
+
+  /* Section title accent underline */
+  .sec-title {
+    display: inline-block;
+    padding-bottom: 3px;
+    border-bottom: 1.5px solid rgba(76,161,175,0.25);
+  }
+
+  /* Sec-lnk slide on hover */
+  .sec-lnk { display: inline-block; transition: transform 0.2s; }
+  .sec-lnk:hover { transform: translateX(3px); text-decoration: none !important; }
+
+  /* Score star glow */
+  .score { text-shadow: 0 0 10px rgba(245,158,11,0.3); }
+
+  /* Progress bar shimmer */
+  .pf {
+    background: linear-gradient(90deg, var(--accent) 0%, #7ecdd6 50%, var(--accent) 100%);
+    background-size: 200% 100%;
+    animation: pfShine 3s linear infinite;
+  }
+  @keyframes pfShine {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+
+  /* Logo hover glow */
+  .logo { transition: filter 0.2s; }
+  .logo:hover { filter: brightness(1.2) drop-shadow(0 0 8px rgba(76,161,175,0.35)); }
+
+  /* Hero particle canvas */
+  #heroPts { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
 </style>
 
 <nav>
@@ -1200,6 +1321,7 @@
 <!-- HOME -->
 <div class="page active" id="page-home">
   <div class="hero">
+    <canvas id="heroPts"></canvas>
     <div class="hero-bg-slider" id="heroSlider"></div>
     <div class="hero-inner">
       <div class="hero-tag">✨ Welcome to Cat-ime</div>
@@ -1352,7 +1474,11 @@
 
       function toast(msg) {
         const t = document.getElementById('toast');
-        t.textContent = msg; t.style.display = 'block';
+        t.textContent = msg;
+        t.style.display = 'block';
+        t.style.animation = 'none';
+        t.offsetHeight;
+        t.style.animation = 'toastIn 0.22s ease forwards';
         clearTimeout(window._tt);
         window._tt = setTimeout(() => t.style.display = 'none', 2400);
       }
@@ -1778,6 +1904,7 @@
           // Vidnest doesn't support color theming like Videasy, so we'll just have to deal with their default player UI :(
         } else {
           url = `https://player.videasy.net/anime/${malId}/${epNum}?color=4ca1af`;
+        
         }
         document.getElementById('playerBox').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${epTitle}"></iframe>`;
         markWatched(malId, epNum);
@@ -1793,6 +1920,7 @@
 
       // Thank you Videasy for providing the anime streaming API for free, you're the real MVP <3
       // NVM FUCK YOU VIDEASY, U JUST GET CANSER THE SEC I CHENGE THE UI
+      // welcome vidnest so if videasy is fucking around u will save us
 
       function markWatched(id, ep) {
         ep = Number(ep);
@@ -2017,6 +2145,42 @@
       document.getElementById('dsSub').classList.toggle('on', curDS === 'sub');
       document.getElementById('dsDub').classList.toggle('on', curDS === 'dub');
       document.getElementById('btnAutoNext').classList.toggle('on', autoNext);
+
+      // Hero floating particles
+      (function() {
+        const hc = document.getElementById('heroPts');
+        if (!hc) return;
+        const ctx = hc.getContext('2d');
+        let pts = [];
+        function resize() {
+          hc.width = hc.parentElement.offsetWidth;
+          hc.height = hc.parentElement.offsetHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        for (let i = 0; i < 50; i++) pts.push({
+          x: Math.random() * hc.width,
+          y: Math.random() * hc.height,
+          r: Math.random() * 1.4 + 0.3,
+          vx: (Math.random() - 0.5) * 0.22,
+          vy: -(Math.random() * 0.32 + 0.06),
+          o: Math.random() * 0.5 + 0.15
+        });
+        (function draw() {
+          ctx.clearRect(0, 0, hc.width, hc.height);
+          pts.forEach(p => {
+            p.x += p.vx; p.y += p.vy;
+            if (p.y < -5) { p.y = hc.height + 5; p.x = Math.random() * hc.width; }
+            if (p.x < -5) p.x = hc.width + 5;
+            if (p.x > hc.width + 5) p.x = -5;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(76,161,175,' + p.o + ')';
+            ctx.fill();
+          });
+          requestAnimationFrame(draw);
+        })();
+      })();
     </script>
 
     <!-- Yo is anyone acually reading this? -->
