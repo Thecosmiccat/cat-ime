@@ -2278,8 +2278,8 @@
       let slideIdx = 0;
       let heroTimer = null;
       function initHeroSlider(list) {
-        slidingHero = list.filter(item => item.banner).slice(0, 5);
-        if (!slidingHero.length) slidingHero = list.slice(0, 5);
+        slidingHero = list.filter(item => item.banner).slice(0, 25);
+        if (!slidingHero.length) slidingHero = list.slice(0, 25);
         const el = document.getElementById('heroSlider');
         if (!el) return;
         el.innerHTML = '';
