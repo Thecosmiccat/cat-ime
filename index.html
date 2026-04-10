@@ -14,7 +14,10 @@
     --card: #202f3d;
     --green: #22c55e;
     --blue: #4ca1af;
-    --yellow: #f59e0b
+    --yellow: #f59e0b;
+    --accent-rgb: 76, 161, 175;
+    --nav-bg: rgba(26, 37, 48, 0.96);
+    --hero-bg: linear-gradient(135deg, #0a122e 0%, #0d0d1a 55%, #080f1a 100%)
   }
 
   * {
@@ -35,9 +38,9 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(26, 37, 48, 0.96);
+    background: var(--nav-bg);
     backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(76, 161, 175, 0.15);
+    border-bottom: 1px solid rgba(var(--accent-rgb), 0.15);
     padding: 0 1.5rem;
     height: 60px;
     display: flex;
@@ -81,19 +84,19 @@
 
   .nl:hover {
     color: var(--text);
-    background: rgba(76, 161, 175, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
     transform: translateY(-1px)
   }
 
   .nl.active {
     color: #fff;
     background: var(--accent);
-    box-shadow: 0 2px 14px rgba(76, 161, 175, 0.35)
+    box-shadow: 0 2px 14px rgba(var(--accent-rgb), 0.35)
   }
 
   .nl.active:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 18px rgba(76, 161, 175, 0.45)
+    box-shadow: 0 4px 18px rgba(var(--accent-rgb), 0.45)
   }
 
   .nav-r {
@@ -123,7 +126,7 @@
   }
 
   .hero {
-    background: linear-gradient(135deg, #0a122e 0%, #0d0d1a 55%, #080f1a 100%);
+    background: var(--hero-bg);
     padding: 2.5rem 1.5rem 2.2rem;
     position: relative;
     overflow: hidden
@@ -174,8 +177,8 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(37, 99, 235, 0.15);
-    border: 1px solid rgba(37, 99, 235, 0.3);
+    background: rgba(var(--accent-rgb), 0.15);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
     border-radius: 20px;
     padding: 0.22rem 0.75rem;
     font-size: 0.7rem;
@@ -1178,37 +1181,37 @@
 
   /* Scrollbar theming */
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(76,161,175,0.28); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(76,161,175,0.52); }
+  ::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb),0.28); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(var(--accent-rgb),0.52); }
 
   /* Card hover glows */
-  .acard:hover { box-shadow: 0 8px 28px rgba(76,161,175,0.18), 0 2px 8px rgba(0,0,0,0.35); }
-  .cw-card:hover { box-shadow: 0 8px 28px rgba(76,161,175,0.14), 0 2px 8px rgba(0,0,0,0.3); }
+  .acard:hover { box-shadow: 0 8px 28px rgba(var(--accent-rgb),0.18), 0 2px 8px rgba(0,0,0,0.35); }
+  .cw-card:hover { box-shadow: 0 8px 28px rgba(var(--accent-rgb),0.14), 0 2px 8px rgba(0,0,0,0.3); }
 
   /* Nav active glow */
-  .nl.active { box-shadow: 0 0 20px rgba(76,161,175,0.48), 0 2px 8px rgba(76,161,175,0.22); }
-  .nl.active:hover { box-shadow: 0 0 26px rgba(76,161,175,0.6), 0 4px 14px rgba(76,161,175,0.28); }
+  .nl.active { box-shadow: 0 0 20px rgba(var(--accent-rgb),0.48), 0 2px 8px rgba(var(--accent-rgb),0.22); }
+  .nl.active:hover { box-shadow: 0 0 26px rgba(var(--accent-rgb),0.6), 0 4px 14px rgba(var(--accent-rgb),0.28); }
 
   /* Notification dot pulse ring */
   @keyframes ndotPulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(76,161,175,0.7); }
-    50% { box-shadow: 0 0 0 5px rgba(76,161,175,0); }
+    0%,100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb),0.7); }
+    50% { box-shadow: 0 0 0 5px rgba(var(--accent-rgb),0); }
   }
   #ndot { animation: ndotPulse 2s ease infinite; }
 
   /* Hero tag breathing glow */
   .hero-tag { animation: tagGlow 4s ease-in-out infinite; }
   @keyframes tagGlow {
-    0%,100% { box-shadow: 0 0 10px rgba(76,161,175,0.08); }
-    50% { box-shadow: 0 0 22px rgba(76,161,175,0.25), 0 0 40px rgba(76,161,175,0.08); }
+    0%,100% { box-shadow: 0 0 10px rgba(var(--accent-rgb),0.08); }
+    50% { box-shadow: 0 0 22px rgba(var(--accent-rgb),0.25), 0 0 40px rgba(var(--accent-rgb),0.08); }
   }
 
   /* Hero title subtle glow */
-  .htitle { text-shadow: 0 2px 40px rgba(76,161,175,0.15); }
+  .htitle { text-shadow: 0 2px 40px rgba(var(--accent-rgb),0.15); }
 
   /* Primary button glow + lift */
-  .btn-p { box-shadow: 0 4px 18px rgba(76,161,175,0.3); }
-  .btn-p:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(76,161,175,0.25); }
+  .btn-p { box-shadow: 0 4px 18px rgba(var(--accent-rgb),0.3); }
+  .btn-p:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(var(--accent-rgb),0.25); }
 
   /* Ghost button lift */
   .btn-g { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
@@ -1216,12 +1219,12 @@
 
   /* Search focus glow */
   .si:focus {
-    box-shadow: 0 0 0 3px rgba(76,161,175,0.14), 0 4px 14px rgba(0,0,0,0.1);
-    border-color: rgba(76,161,175,0.55) !important;
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.14), 0 4px 14px rgba(0,0,0,0.1);
+    border-color: rgba(var(--accent-rgb),0.55) !important;
   }
 
   /* Active filter glow */
-  .fp.on { box-shadow: 0 0 14px rgba(76,161,175,0.2); }
+  .fp.on { box-shadow: 0 0 14px rgba(var(--accent-rgb),0.2); }
 
   /* Current episode left accent bar */
   .epi.cur {
@@ -1237,30 +1240,30 @@
 
   /* Player glow when active */
   .player-box:has(iframe) {
-    box-shadow: 0 0 40px rgba(76,161,175,0.1), 0 0 0 1px rgba(76,161,175,0.12);
+    box-shadow: 0 0 40px rgba(var(--accent-rgb),0.1), 0 0 0 1px rgba(var(--accent-rgb),0.12);
   }
 
   /* Play chip accent tint on hover */
   .thumb-ov:hover .play-chip {
-    background: linear-gradient(135deg, rgba(76,161,175,0.4), rgba(76,161,175,0.15));
-    box-shadow: 0 0 28px rgba(76,161,175,0.5), 0 14px 34px rgba(0,0,0,0.25);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb),0.4), rgba(var(--accent-rgb),0.15));
+    box-shadow: 0 0 28px rgba(var(--accent-rgb),0.5), 0 14px 34px rgba(0,0,0,0.25);
   }
 
   /* Modal backdrop blur */
   .modal-wrap.open { backdrop-filter: blur(6px); }
-  .modal { box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(76,161,175,0.08); }
+  .modal { box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(var(--accent-rgb),0.08); }
 
   /* Notification panel glass */
   .np {
     backdrop-filter: blur(16px);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(76,161,175,0.08);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(var(--accent-rgb),0.08);
   }
 
   /* Section title accent underline */
   .sec-title {
     display: inline-block;
     padding-bottom: 3px;
-    border-bottom: 1.5px solid rgba(76,161,175,0.25);
+    border-bottom: 1.5px solid rgba(var(--accent-rgb),0.25);
   }
 
   /* Sec-lnk slide on hover */
@@ -1283,10 +1286,96 @@
 
   /* Logo hover glow */
   .logo { transition: filter 0.2s; }
-  .logo:hover { filter: brightness(1.2) drop-shadow(0 0 8px rgba(76,161,175,0.35)); }
+  .logo:hover { filter: brightness(1.2) drop-shadow(0 0 8px rgba(var(--accent-rgb),0.35)); }
 
   /* Hero particle canvas */
   #heroPts { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+
+  /* Settings panel */
+  .sp {
+    display: none;
+    position: fixed;
+    top: 62px;
+    right: 1rem;
+    z-index: 150;
+    width: 300px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 0.85rem;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(var(--accent-rgb),0.08)
+  }
+  .sp.open { display: block }
+  .sp-hd {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--border)
+  }
+  .sp-sec {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin: 0.85rem 0 0.4rem
+  }
+  .sp-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.45rem;
+    font-size: 0.79rem;
+    color: var(--text2)
+  }
+  .sp-btns { display: flex; gap: 4px }
+  .th-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 0.1rem
+  }
+  .th-sw {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2.5px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+    flex-shrink: 0
+  }
+  .th-sw:hover { transform: scale(1.18) }
+  .th-sw.active { border-color: var(--text) }
+  .sp-btn-d {
+    font-size: 0.74rem;
+    padding: 0.32rem 0.7rem;
+    border-radius: 7px;
+    background: rgba(239,68,68,0.1);
+    color: #ef6666;
+    border: 1px solid rgba(239,68,68,0.18);
+    cursor: pointer;
+    transition: 0.15s;
+    font-family: 'DM Sans', sans-serif
+  }
+  .sp-btn-d:hover { background: rgba(239,68,68,0.2) }
+  .sp-btn-e {
+    font-size: 0.74rem;
+    padding: 0.32rem 0.7rem;
+    border-radius: 7px;
+    background: rgba(var(--accent-rgb),0.08);
+    color: var(--accent);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: 0.15s;
+    font-family: 'DM Sans', sans-serif
+  }
+  .sp-btn-e:hover { background: rgba(var(--accent-rgb),0.18) }
 </style>
 
 <nav>
@@ -1298,7 +1387,7 @@
         <button class="nl" onclick="goPage('watch')">Watch</button>
         <button class="nl" onclick="goPage('list')">My List</button>
       </div>
-      <div class="nav-r">
+      <div class="nav-r" style="display:flex;align-items:center;gap:0.75rem">
         <div style="cursor:pointer;position:relative" onclick="toggleNP()">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -1308,6 +1397,13 @@
           <span id="ndot"
             style="position:absolute;top:-1px;right:-1px;width:7px;height:7px;border-radius:50%;background:var(--accent);border:1.5px solid var(--bg);display:none"></span>
         </div>
+        <div style="cursor:pointer" onclick="toggleSP()" title="Settings">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </div>
       </div>
 </nav>
 
@@ -1315,6 +1411,41 @@
   <div class="np-hd">Notifications <span class="npm" onclick="markRead()">Mark all read</span></div>
   <div id="npList">
     <div style="padding:1rem;text-align:center;color:var(--text3);font-size:0.8rem">Loading notifications...</div>
+  </div>
+</div>
+
+<div class="sp" id="spPanel">
+  <div class="sp-hd">Settings</div>
+
+  <div class="sp-sec">Playback</div>
+  <div class="sp-row">
+    <span>Default audio</span>
+    <div class="sp-btns">
+      <button class="db2" id="spDsSub" onclick="setDS('sub')">SUB</button>
+      <button class="db2" id="spDsDub" onclick="setDS('dub')">DUB</button>
+    </div>
+  </div>
+  <div class="sp-row">
+    <span>Source</span>
+    <div class="sp-btns">
+      <button class="db2" id="spSrcVideasy" onclick="setSrc('videasy')">Videasy</button>
+      <button class="db2" id="spSrcVidnest" onclick="setSrc('vidnest')">Vidnest</button>
+    </div>
+  </div>
+  <div class="sp-row">
+    <span>Auto-next episode</span>
+    <button class="db2" id="spAutoNext" onclick="toggleAutoNext()">Off</button>
+  </div>
+
+  <div class="sp-sec">Theme</div>
+  <div class="th-swatches" id="thSwatches"></div>
+
+  <div class="sp-sec">Data</div>
+  <div class="sp-row" style="flex-direction:column;align-items:flex-start;gap:0.4rem">
+    <button class="sp-btn-d" onclick="clearCW()">Clear continue watching</button>
+    <button class="sp-btn-d" onclick="clearHistory()">Clear all watch progress</button>
+    <button class="sp-btn-d" onclick="clearList()">Clear my list</button>
+    <button class="sp-btn-e" onclick="exportList()">Export list as JSON</button>
   </div>
 </div>
 
@@ -1443,6 +1574,105 @@
       // DB removed in favor of direct AniList Graph API calls
       // Wtf was I thinking adding a local DB in a client-side app lmao
       // well at least the code is cleaner now :)
+
+      const themes = [
+        { accent:'#4ca1af', bg:'#1a2530', bg2:'#243342', bg3:'#2c3e50', bg4:'#354b5e', card:'#202f3d', text:'#eef2f7', text2:'#8da3b3', text3:'#5a7383', border:'rgba(var(--accent-rgb),0.12)' },
+        { accent:'#00f5a0', bg:'#1e0f3c', bg2:'#261550', bg3:'#2d1a62', bg4:'#361f74', card:'#221244', text:'#f0eeff', text2:'#a898d8', text3:'#706098', border:'rgba(0,245,160,0.15)' },
+        { accent:'#ffeb55', bg:'#3c1950', bg2:'#4a2260', bg3:'#562870', bg4:'#622e80', card:'#3a1850', text:'#fff8e8', text2:'#c8a8e0', text3:'#806090', border:'rgba(255,235,85,0.15)' },
+        { accent:'#ffeb55', bg:'#1ea064', bg2:'#179058', bg3:'#10804c', bg4:'#087040', card:'#1c9a60', text:'#f8ffd0', text2:'#a8e8c0', text3:'#60b070', border:'rgba(255,235,85,0.15)' },
+        { accent:'#f5735a', bg:'#141414', bg2:'#1e1e1e', bg3:'#282828', bg4:'#323232', card:'#1a1a1a', text:'#f5efed', text2:'#b8a8a0', text3:'#706050', border:'rgba(245,115,90,0.15)' },
+        { accent:'#c9b8f5', bg:'#0e1531', bg2:'#141d3e', bg3:'#1a254a', bg4:'#202d56', card:'#111830', text:'#f0eeff', text2:'#a090d8', text3:'#6a5898', border:'rgba(201,184,245,0.15)' },
+        { accent:'#bef000', bg:'#0f6441', bg2:'#0a5234', bg3:'#064228', bg4:'#03341c', card:'#0d5e3c', text:'#f0ffc8', text2:'#90d880', text3:'#509050', border:'rgba(190,240,0,0.15)' },
+        { accent:'#e65078', bg:'#141414', bg2:'#1e1e1e', bg3:'#282828', bg4:'#323232', card:'#1a1a1a', text:'#ffeef3', text2:'#c08898', text3:'#907080', border:'rgba(230,80,120,0.15)' },
+      ];
+
+      function hexToRgb(hex) {
+        return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+      }
+
+      function darkenHex(hex, f) {
+        return '#' + hexToRgb(hex).map(c => Math.max(0,Math.round(c*f)).toString(16).padStart(2,'0')).join('');
+      }
+
+      let particleColor = [76, 161, 175];
+
+      function applyTheme(idx) {
+        const t = themes[idx];
+        const r = document.documentElement;
+        r.style.setProperty('--accent', t.accent);
+        r.style.setProperty('--bg',     t.bg);
+        r.style.setProperty('--bg2',    t.bg2);
+        r.style.setProperty('--bg3',    t.bg3);
+        r.style.setProperty('--bg4',    t.bg4);
+        r.style.setProperty('--card',   t.card);
+        r.style.setProperty('--text',   t.text);
+        r.style.setProperty('--text2',  t.text2);
+        r.style.setProperty('--text3',  t.text3);
+        r.style.setProperty('--border', t.border);
+        const [ar, ag, ab] = hexToRgb(t.accent);
+        r.style.setProperty('--accent-rgb', `${ar}, ${ag}, ${ab}`);
+        const [br, bg2, bb] = hexToRgb(t.bg);
+        r.style.setProperty('--nav-bg', `rgba(${br},${bg2},${bb},0.96)`);
+        r.style.setProperty('--hero-bg', `linear-gradient(135deg, ${darkenHex(t.bg,0.55)} 0%, ${darkenHex(t.bg,0.45)} 55%, ${darkenHex(t.bg,0.5)} 100%)`);
+        particleColor = [ar, ag, ab];
+        localStorage.setItem('pref_theme', idx);
+        document.querySelectorAll('.th-sw').forEach((s, i) => s.classList.toggle('active', i === idx));
+      }
+
+      function buildThemeSwatches() {
+        const wrap = document.getElementById('thSwatches');
+        themes.forEach((t, i) => {
+          const s = document.createElement('div');
+          s.className = 'th-sw' + (i === (parseInt(localStorage.getItem('pref_theme') || '0')) ? ' active' : '');
+          s.style.background = `linear-gradient(to right, ${t.accent} 50%, ${t.bg} 50%)`;
+          s.title = i === 0 ? 'Default' : `Theme ${i}`;
+          s.onclick = () => applyTheme(i);
+          wrap.appendChild(s);
+        });
+      }
+
+      function toggleSP() {
+        document.getElementById('npPanel').classList.remove('open');
+        document.getElementById('spPanel').classList.toggle('open');
+      }
+
+      function clearCW() {
+        if (!confirm('Clear continue watching history?')) return;
+        localStorage.removeItem('cw');
+        loadCW();
+        toast('Continue watching cleared');
+      }
+
+      function clearHistory() {
+        if (!confirm('Clear all episode watch progress? This cannot be undone.')) return;
+        Object.keys(localStorage).filter(k => k.startsWith('w_')).forEach(k => localStorage.removeItem(k));
+        toast('Watch history cleared');
+      }
+
+      function clearList() {
+        if (!confirm('Clear your entire list? This cannot be undone.')) return;
+        const f = JSON.parse(localStorage.getItem('followed') || '[]');
+        f.forEach(id => localStorage.removeItem('stat_' + id));
+        localStorage.removeItem('followed');
+        loadMyList();
+        toast('My list cleared');
+      }
+
+      function exportList() {
+        const f = JSON.parse(localStorage.getItem('followed') || '[]');
+        if (!f.length) { toast('Your list is empty'); return; }
+        const data = f.map(id => ({
+          id,
+          status: localStorage.getItem('stat_' + id) || 'sw',
+          watchedEps: JSON.parse(localStorage.getItem('w_' + id) || '[]'),
+        }));
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'cat-ime-list.json';
+        a.click();
+        toast('List exported!');
+      }
 
       let curAnime = null;
       let curEp = 1;
@@ -1862,6 +2092,9 @@
         localStorage.setItem('pref_autonext', autoNext);
         const b = document.getElementById('btnAutoNext');
         b.classList.toggle('on', autoNext);
+        const sp = document.getElementById('spAutoNext');
+        sp.classList.toggle('on', autoNext);
+        sp.textContent = autoNext ? 'On' : 'Off';
         toast(autoNext ? 'Auto Next on' : 'Auto Next off');
       }
       // holy shit this somehow works
@@ -1903,7 +2136,8 @@
           url = `https://vidnest.fun/anime/${malId}/${epNum}/${curDS}`;
           // Vidnest doesn't support color theming like Videasy, so we'll just have to deal with their default player UI :(
         } else {
-          url = `https://player.videasy.net/anime/${malId}/${epNum}?color=4ca1af`;
+          const accentHex = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim().replace('#', '');
+          url = `https://player.videasy.net/anime/${malId}/${epNum}?color=${accentHex}`;
         
         }
         document.getElementById('playerBox').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${epTitle}"></iframe>`;
@@ -1996,6 +2230,8 @@
         localStorage.setItem('pref_ds', t);
         document.getElementById('dsSub').classList.toggle('on', t === 'sub');
         document.getElementById('dsDub').classList.toggle('on', t === 'dub');
+        document.getElementById('spDsSub').classList.toggle('on', t === 'sub');
+        document.getElementById('spDsDub').classList.toggle('on', t === 'dub');
         if (curAnime) loadPlayer(curAnime.id, curEp, 'Episode ' + curEp, curEp, curAnime.eps);
       }
 
@@ -2004,6 +2240,8 @@
         localStorage.setItem('pref_source', s);
         document.getElementById('srcVideasy').classList.toggle('on', s === 'videasy');
         document.getElementById('srcVidnest').classList.toggle('on', s === 'vidnest');
+        document.getElementById('spSrcVideasy').classList.toggle('on', s === 'videasy');
+        document.getElementById('spSrcVidnest').classList.toggle('on', s === 'vidnest');
         if (curAnime) loadPlayer(curAnime.id, curEp, 'Episode ' + curEp, curEp, curAnime.eps);
       }
 
@@ -2032,6 +2270,8 @@
       document.addEventListener('click', e => {
         if (!e.target.closest('#npPanel') && !e.target.closest('[onclick="toggleNP()"]'))
           document.getElementById('npPanel').classList.remove('open');
+        if (!e.target.closest('#spPanel') && !e.target.closest('[onclick="toggleSP()"]'))
+          document.getElementById('spPanel').classList.remove('open');
       });
 
       let slidingHero = [];
@@ -2145,6 +2385,18 @@
       document.getElementById('dsSub').classList.toggle('on', curDS === 'sub');
       document.getElementById('dsDub').classList.toggle('on', curDS === 'dub');
       document.getElementById('btnAutoNext').classList.toggle('on', autoNext);
+      // sync settings panel toggles
+      document.getElementById('spDsSub').classList.toggle('on', curDS === 'sub');
+      document.getElementById('spDsDub').classList.toggle('on', curDS === 'dub');
+      document.getElementById('spSrcVideasy').classList.toggle('on', curSource === 'videasy');
+      document.getElementById('spSrcVidnest').classList.toggle('on', curSource === 'vidnest');
+      const spAN = document.getElementById('spAutoNext');
+      spAN.classList.toggle('on', autoNext);
+      spAN.textContent = autoNext ? 'On' : 'Off';
+      // build theme swatches + apply saved theme
+      buildThemeSwatches();
+      const savedTheme = parseInt(localStorage.getItem('pref_theme') || '0');
+      if (savedTheme > 0) applyTheme(savedTheme);
 
       // Hero floating particles
       (function() {
@@ -2175,7 +2427,7 @@
             if (p.x > hc.width + 5) p.x = -5;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(76,161,175,' + p.o + ')';
+            ctx.fillStyle = `rgba(${particleColor[0]},${particleColor[1]},${particleColor[2]},${p.o})`;
             ctx.fill();
           });
           requestAnimationFrame(draw);
