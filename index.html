@@ -1961,8 +1961,7 @@
           }
           if (!allEps.length) return;
           if (curAnime && curAnime.id === id) {
-            const cap = curAnime.eps;
-            buildEpList(a, cap, allEps.slice(0, cap));
+            buildEpList(a, epCount, allEps);
           }
         } catch (e) { }
       }
@@ -2025,7 +2024,7 @@
       async function fetchSeasons(id) {
         const sel = document.getElementById('seasonSelect');
         sel.style.display = 'none';
-        const q = `query($id: Int){ Media(id: $id) { title { english romaji } relations { edges { relationType node { id title { romaji english } format episodes coverImage { large } isAdult } } } } }`;
+        const q = `query($id: Int){ Media(id: $id) { title { english romaji } relations { edges { relationType node { id idMal title { romaji english } format episodes coverImage { large } isAdult } } } } }`;
         try {
           const res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, variables: { id } }) });
           const d = await res.json();
@@ -2038,7 +2037,7 @@
               const t = (r.node.title.english || r.node.title.romaji).replace(/'/g, "");
               const eps = r.node.episodes || 12;
               const img = r.node.coverImage.large;
-              html += `<option value='{"id":${r.node.id},"title":"${t.replace(/"/g, "&quot;")}","eps":${eps},"img":"${img}","dubbed":true,"score":"?"}'>${r.relationType}: ${t}</option>`;
+              html += `<option value='{"id":${r.node.id},"malId":${r.node.idMal || 'null'},"title":"${t.replace(/"/g, "&quot;")}","eps":${eps},"img":"${img}","dubbed":true,"score":"?"}'>${r.relationType}: ${t}</option>`;
             });
             sel.innerHTML = html;
             sel.style.display = 'inline-block';
@@ -2123,7 +2122,7 @@
         for (let i = 1; i <= total; i++) {
           const item = document.createElement('div');
           item.className = 'epi' + (watched.has(i) ? ' done' : '') + (i === 1 ? ' cur' : '');
-          
+
           let rawTitle = epTitles[i - 1] ? (epTitles[i - 1].title || '') : '';
           rawTitle = rawTitle.replace(/^Episode\s+\d+\s*[-:–]\s*/i, '').trim();
           const epLabel = rawTitle || `Episode ${i}`;
