@@ -1531,6 +1531,7 @@
           <button class="mkb" id="btnFollow" onclick="toggleFollow()">🔔 Follow</button>
           <button class="mkb" id="btnAutoNext" onclick="toggleAutoNext()" title="Auto Next Episode">⏭ Auto Next</button>
         </div>
+        <div id="epCountdown" style="display:none;margin-top:0.6rem;font-size:0.78rem;color:var(--accent);font-weight:500;letter-spacing:0.01em"></div>
       </div>
     </div>
     <div>
@@ -1698,6 +1699,7 @@
         if (idx[id] !== undefined) document.querySelectorAll('.nl')[idx[id]].classList.add('active');
 
         if (id !== 'watch') {
+          clearCountdown();
         }
         if (id === 'home') loadCW();
       }
@@ -1934,10 +1936,12 @@
         goPage('watch');
         document.getElementById('watchTitle').textContent = a.title;
         document.getElementById('watchMeta').textContent = 'Loading episodes...';
+        clearCountdown();
         buildEpList(a, epCount, []);
         loadPlayer(a.id, 1, 'Episode 1', 1, epCount);
         updateFollowBtn();
         fetchSeasons(a.id);
+        fetchAiringInfo(a.id);
         fetchEpisodeTitles(a.id, a, epCount);
       }
 
@@ -1957,9 +1961,65 @@
           }
           if (!allEps.length) return;
           if (curAnime && curAnime.id === id) {
-            buildEpList(a, epCount, allEps);
+            const cap = curAnime.eps;
+            buildEpList(a, cap, allEps.slice(0, cap));
           }
         } catch (e) { }
+      }
+
+      let countdownTimer = null;
+
+      async function fetchAiringInfo(animeId) {
+        const q = `query($id:Int){ Media(id:$id){ nextAiringEpisode { episode airingAt } } }`;
+        try {
+          const res = await fetch('https://graphql.anilist.co', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: q, variables: { id: animeId } })
+          });
+          const d = await res.json();
+          if (!d.data?.Media || curAnime?.id !== animeId) return;
+          const nae = d.data.Media.nextAiringEpisode;
+          if (nae) {
+            const airedCount = nae.episode - 1;
+            if (airedCount > 0 && airedCount < curAnime.eps) {
+              curAnime.eps = airedCount;
+              buildEpList(curAnime, airedCount, []);
+              fetchEpisodeTitles(animeId, curAnime, airedCount);
+            }
+            const secsUntil = nae.airingAt - Math.floor(Date.now() / 1000);
+            if (secsUntil > 0 && secsUntil <= 7 * 24 * 3600) {
+              startCountdown(nae.episode, nae.airingAt);
+            } else {
+              clearCountdown();
+            }
+          } else {
+            clearCountdown();
+          }
+        } catch (e) { }
+      }
+
+      function startCountdown(epNum, airingAt) {
+        clearCountdown();
+        const el = document.getElementById('epCountdown');
+        function tick() {
+          const secs = airingAt - Math.floor(Date.now() / 1000);
+          if (secs <= 0) { el.style.display = 'none'; clearInterval(countdownTimer); return; }
+          const d = Math.floor(secs / 86400);
+          const h = Math.floor((secs % 86400) / 3600);
+          const m = Math.floor((secs % 3600) / 60);
+          const s = secs % 60;
+          const timeStr = d > 0 ? `${d}d ${h}h ${m}m` : h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`;
+          el.textContent = `⏱ Ep ${epNum} in ${timeStr}`;
+          el.style.display = 'block';
+        }
+        tick();
+        countdownTimer = setInterval(tick, 1000);
+      }
+
+      function clearCountdown() {
+        clearInterval(countdownTimer);
+        document.getElementById('epCountdown').style.display = 'none';
       }
 
       async function fetchSeasons(id) {
