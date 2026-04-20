@@ -1346,12 +1346,15 @@
     height: 26px;
     border-radius: 50%;
     cursor: pointer;
-    border: 2.5px solid transparent;
-    transition: transform 0.15s, border-color 0.15s;
+    border: none;
+    outline: 2.5px solid transparent;
+    outline-offset: 2px;
+    overflow: hidden;
+    transition: transform 0.15s, outline-color 0.15s;
     flex-shrink: 0
   }
   .th-sw:hover { transform: scale(1.18) }
-  .th-sw.active { border-color: var(--text) }
+  .th-sw.active { outline-color: var(--text) }
   .sp-btn-d {
     font-size: 0.74rem;
     padding: 0.32rem 0.7rem;
@@ -1577,14 +1580,22 @@
       // well at least the code is cleaner now :)
 
       const themes = [
-        { accent:'#4ca1af', bg:'#1a2530', bg2:'#243342', bg3:'#2c3e50', bg4:'#354b5e', card:'#202f3d', text:'#eef2f7', text2:'#8da3b3', text3:'#5a7383', border:'rgba(var(--accent-rgb),0.12)' },
-        { accent:'#00f5a0', bg:'#1e0f3c', bg2:'#261550', bg3:'#2d1a62', bg4:'#361f74', card:'#221244', text:'#f0eeff', text2:'#a898d8', text3:'#706098', border:'rgba(0,245,160,0.15)' },
-        { accent:'#ffeb55', bg:'#3c1950', bg2:'#4a2260', bg3:'#562870', bg4:'#622e80', card:'#3a1850', text:'#fff8e8', text2:'#c8a8e0', text3:'#806090', border:'rgba(255,235,85,0.15)' },
-        { accent:'#ffeb55', bg:'#1ea064', bg2:'#179058', bg3:'#10804c', bg4:'#087040', card:'#1c9a60', text:'#f8ffd0', text2:'#a8e8c0', text3:'#60b070', border:'rgba(255,235,85,0.15)' },
-        { accent:'#f5735a', bg:'#141414', bg2:'#1e1e1e', bg3:'#282828', bg4:'#323232', card:'#1a1a1a', text:'#f5efed', text2:'#b8a8a0', text3:'#706050', border:'rgba(245,115,90,0.15)' },
+        // 0 Default — deep ocean teal (keep)
+        { accent:'#4ca1af', bg:'#1a2530', bg2:'#243342', bg3:'#2c3e50', bg4:'#354b5e', card:'#202f3d', text:'#eef2f7', text2:'#8da3b3', text3:'#5a7383', border:'rgba(76,161,175,0.12)' },
+        // 1 Midnight Rose — warm dark with rose-pink accent
+        { accent:'#f4718f', bg:'#160d14', bg2:'#201219', bg3:'#2a1820', bg4:'#341e28', card:'#1b1017', text:'#fdf0f3', text2:'#c49aaa', text3:'#7a5060', border:'rgba(244,113,143,0.14)' },
+        // 2 Amber Noir — warm black with golden amber
+        { accent:'#f5a623', bg:'#141210', bg2:'#1e1a16', bg3:'#28231c', bg4:'#322c22', card:'#1a1612', text:'#fdf7ed', text2:'#c8aa80', text3:'#806040', border:'rgba(245,166,35,0.14)' },
+        // 3 Arctic — cool near-white light theme
+        { accent:'#0077cc', bg:'#f4f7fb', bg2:'#e8edf4', bg3:'#dde4ee', bg4:'#d2dae8', card:'#ffffff', text:'#0d1520', text2:'#4a6080', text3:'#8aa0b8', border:'rgba(0,119,204,0.14)' },
+        // 4 Sakura — soft dark with cherry blossom pink
+        { accent:'#e88fa8', bg:'#18101a', bg2:'#22162a', bg3:'#2c1c36', bg4:'#362242', card:'#1e1222', text:'#fdf0f5', text2:'#c098b0', text3:'#785868', border:'rgba(232,143,168,0.14)' },
+        // 5 Purple (keep)
         { accent:'#c9b8f5', bg:'#0e1531', bg2:'#141d3e', bg3:'#1a254a', bg4:'#202d56', card:'#111830', text:'#f0eeff', text2:'#a090d8', text3:'#6a5898', border:'rgba(201,184,245,0.15)' },
-        { accent:'#bef000', bg:'#0f6441', bg2:'#0a5234', bg3:'#064228', bg4:'#03341c', card:'#0d5e3c', text:'#f0ffc8', text2:'#90d880', text3:'#509050', border:'rgba(190,240,0,0.15)' },
-        { accent:'#e65078', bg:'#141414', bg2:'#1e1e1e', bg3:'#282828', bg4:'#323232', card:'#1a1a1a', text:'#ffeef3', text2:'#c08898', text3:'#907080', border:'rgba(230,80,120,0.15)' },
+        // 6 Emerald Dark — deep forest with bright emerald
+        { accent:'#34d399', bg:'#0d1a14', bg2:'#12211b', bg3:'#172922', bg4:'#1c3129', card:'#101e18', text:'#edfaf4', text2:'#80c4a8', text3:'#487858', border:'rgba(52,211,153,0.14)' },
+        // 7 Slate Mono — pure monochrome with a blue-slate accent
+        { accent:'#94a3b8', bg:'#0f1116', bg2:'#171b22', bg3:'#1e232c', bg4:'#262c36', card:'#131720', text:'#e8ecf2', text2:'#8898aa', text3:'#506070', border:'rgba(148,163,184,0.14)' },
       ];
 
       function hexToRgb(hex) {
@@ -2495,3 +2506,6 @@
     </script>
 
     <!-- Yo is anyone acually reading this? -->
+    <footer style="text-align:center;padding:1.5rem;color:var(--text3);font-size:0.75rem;font-family:'DM Sans',sans-serif;border-top:1px solid var(--border);margin-top:2rem;">
+      v2.1
+    </footer>
