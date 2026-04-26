@@ -1,3 +1,4 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap');
 
@@ -1379,6 +1380,424 @@
     font-family: 'DM Sans', sans-serif
   }
   .sp-btn-e:hover { background: rgba(var(--accent-rgb),0.18) }
+
+  /* ── MOBILE RESPONSIVE DESIGN ── */
+
+  /* Tablets (768px and below) */
+  @media (max-width: 768px) {
+    /* Navigation adjustments */
+    nav {
+      padding: 0 1rem;
+      height: 56px;
+    }
+    
+    .logo {
+      font-size: 1.2rem;
+    }
+    
+    .nav-links {
+      gap: 2px;
+    }
+    
+    .nl {
+      font-size: 0.65rem;
+      padding: 0.35rem 0.8rem;
+    }
+    
+    /* Hero section */
+    .hero {
+      padding: 2rem 1rem 1.5rem;
+    }
+    
+    .hero-inner {
+      max-width: 100%;
+    }
+    
+    .htitle {
+      font-size: 1.8rem;
+      line-height: 1.1;
+    }
+    
+    .hsub {
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    
+    .hbtns {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .btn-p, .btn-g {
+      width: 100%;
+      text-align: center;
+    }
+    
+    /* Grid adjustments */
+    .grid {
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 0.6rem;
+    }
+    
+    .cw-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.6rem;
+    }
+    
+    /* Sections */
+    .sec {
+      padding: 1.2rem 1rem;
+    }
+    
+    .sec-hd {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    
+    /* Search page */
+    .search-wrap {
+      padding: 1.2rem 1rem;
+    }
+    
+    .filters {
+      gap: 0.4rem;
+    }
+    
+    .fp {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.7rem;
+    }
+    
+    /* Watch page */
+    .watch-wrap {
+      padding: 1rem;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .brow {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .dst {
+      flex-wrap: wrap;
+    }
+    
+    .db2, .mkb {
+      font-size: 0.68rem;
+      padding: 0.25rem 0.6rem;
+    }
+    
+    /* List page */
+    .list-wrap {
+      padding: 1.2rem 1rem;
+    }
+    
+    .lt {
+      font-size: 0.75rem;
+    }
+    
+    .lt th, .lt td {
+      padding: 0.5rem 0.6rem;
+    }
+    
+    /* Modals and panels */
+    .modal {
+      max-width: 320px;
+      width: 95%;
+      padding: 1.4rem;
+    }
+    
+    .np, .sp {
+      width: calc(100% - 2rem);
+      right: 1rem;
+      left: 1rem;
+      max-width: none;
+    }
+    
+    /* Footer */
+    .footer {
+      padding: 1.5rem 1rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  /* Mobile phones (480px and below) */
+  @media (max-width: 480px) {
+    /* Navigation */
+    nav {
+      padding: 0 0.75rem;
+      height: 52px;
+    }
+    
+    .logo {
+      font-size: 1.1rem;
+    }
+    
+    .nav-links {
+      gap: 1px;
+    }
+    
+    .nl {
+      font-size: 0.6rem;
+      padding: 0.3rem 0.6rem;
+    }
+    
+    .nav-r {
+      gap: 0.5rem;
+    }
+    
+    /* Hero */
+    .hero {
+      padding: 1.5rem 0.75rem 1.2rem;
+    }
+    
+    .htitle {
+      font-size: 1.5rem;
+    }
+    
+    .hsub {
+      font-size: 0.8rem;
+    }
+    
+    /* Grids - smaller cards on mobile */
+    .grid {
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 0.5rem;
+    }
+    
+    .cw-grid {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+    
+    /* Cards */
+    .acard-info {
+      padding: 0.4rem;
+    }
+    
+    .acard-title {
+      font-size: 0.7rem;
+      margin-bottom: 0.15rem;
+    }
+    
+    .acard-meta {
+      font-size: 0.6rem;
+      gap: 0.3rem;
+    }
+    
+    .cw-info {
+      padding: 0.5rem;
+    }
+    
+    .cw-title {
+      font-size: 0.78rem;
+    }
+    
+    .cw-ep {
+      font-size: 0.68rem;
+    }
+    
+    /* Sections */
+    .sec {
+      padding: 1rem 0.75rem;
+    }
+    
+    .sec-title {
+      font-size: 0.85rem;
+    }
+    
+    .sec-lnk {
+      font-size: 0.7rem;
+    }
+    
+    /* Search */
+    .search-wrap {
+      padding: 1rem 0.75rem;
+    }
+    
+    .si {
+      font-size: 0.85rem;
+      padding: 0.65rem 0.85rem 0.65rem 2.4rem;
+    }
+    
+    .filters {
+      gap: 0.35rem;
+    }
+    
+    .fp {
+      font-size: 0.65rem;
+      padding: 0.22rem 0.6rem;
+    }
+    
+    /* Watch page */
+    .watch-wrap {
+      padding: 0.75rem;
+    }
+    
+    .ep-big {
+      font-size: 1rem;
+    }
+    
+    .ep-sm {
+      font-size: 0.75rem;
+    }
+    
+    .brow {
+      gap: 0.4rem;
+    }
+    
+    .db2, .mkb {
+      font-size: 0.65rem;
+      padding: 0.22rem 0.5rem;
+    }
+    
+    .ep-list {
+      max-height: 400px;
+    }
+    
+    .epi {
+      padding: 0.4rem 0.5rem;
+      gap: 0.4rem;
+    }
+    
+    .en {
+      font-size: 0.65rem;
+      min-width: 22px;
+    }
+    
+    .enm {
+      font-size: 0.72rem;
+    }
+    
+    /* List page */
+    .list-wrap {
+      padding: 1rem 0.75rem;
+    }
+    
+    .list-hd-t {
+      font-size: 1.1rem;
+    }
+    
+    .lt {
+      font-size: 0.7rem;
+    }
+    
+    .lt th, .lt td {
+      padding: 0.4rem 0.5rem;
+    }
+    
+    /* Modals */
+    .modal {
+      max-width: 280px;
+      padding: 1.2rem;
+    }
+    
+    .mlogo {
+      font-size: 1.1rem;
+    }
+    
+    .msub {
+      font-size: 0.75rem;
+    }
+    
+    /* Settings panel */
+    .sp {
+      top: 54px;
+      max-height: calc(100vh - 70px);
+    }
+    
+    .sp-hd {
+      font-size: 0.78rem;
+    }
+    
+    .sp-row {
+      font-size: 0.75rem;
+    }
+    
+    .th-sw {
+      width: 24px;
+      height: 24px;
+    }
+    
+    /* Notification panel */
+    .np {
+      top: 54px;
+      max-height: calc(100vh - 70px);
+    }
+    
+    .np-hd {
+      font-size: 0.78rem;
+    }
+    
+    .nit {
+      font-size: 0.72rem;
+    }
+    
+    .nts {
+      font-size: 0.64rem;
+    }
+    
+    /* Footer */
+    .footer {
+      padding: 1.2rem 0.75rem;
+      font-size: 0.7rem;
+    }
+    
+    /* Adjust hero background for mobile */
+    .hero-bg-slider {
+      width: 70%;
+      opacity: 0.25;
+    }
+    
+    /* Make buttons more touch-friendly */
+    .acard, .cw-card {
+      min-height: 44px; /* iOS touch target minimum */
+    }
+    
+    .nl, .btn-p, .btn-g, .fp, .db2, .mkb, .epi {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Toast positioning for mobile */
+    #toast {
+      bottom: 1rem;
+      right: 1rem;
+      left: 1rem;
+      max-width: none;
+      text-align: center;
+    }
+  }
+
+  /* Extra small screens (320px and below) */
+  @media (max-width: 320px) {
+    .grid {
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 0.4rem;
+    }
+    
+    .acard-title {
+      font-size: 0.65rem;
+    }
+    
+    .acard-meta {
+      font-size: 0.55rem;
+    }
+    
+    .logo {
+      font-size: 1rem;
+    }
+    
+    .nl {
+      font-size: 0.55rem;
+      padding: 0.25rem 0.5rem;
+    }
+  }
 </style>
 
 <nav>
