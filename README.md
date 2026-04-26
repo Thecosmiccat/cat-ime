@@ -1,5 +1,7 @@
 # 🐾Cat-ime
 
+#WARNING: none of the sources are working so please wait untill they come back online as I have no control over this.
+
 A cat-themed anime streaming app — fully standalone, no backend, no build step. 
 
 If you like this project, please consider giving this a star🌟!
