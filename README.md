@@ -23,4 +23,4 @@ Just go to: https://thecosmiccat.github.io/cat-ime/
 - Vanilla HTML/CSS/JS — single file, zero dependencies
 - [AniList GraphQL API](https://anilist.gitbook.io/anilist-apiv2-docs/) for anime metadata
 - [Jikan API](https://jikan.moe/) for episode titles
-- [Videasy](https://videasy.net/) and [Vidnest](https://vidnest.fun/) for streaming
+- [Videasy](https://videasy.net/) and [Vidnest](https://vidnest.fun/)(the other source is also from vidnest) for streaming
