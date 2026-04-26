@@ -226,6 +226,12 @@
     min-height: calc(100vh - 54px)
   }
 
+  @media (min-width: 769px) {
+    .page {
+      padding-top: 60px
+    }
+  }
+
   .page.active {
     display: block
   }
@@ -732,6 +738,53 @@
     color: var(--accent)
   }
 
+  .filter-row {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
+    align-items: center;
+    flex-wrap: wrap
+  }
+
+  .filter-select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 0.7rem;
+    color: var(--text);
+    font-size: 0.75rem;
+    cursor: pointer;
+    outline: none;
+    transition: 0.15s
+  }
+
+  .filter-select:hover {
+    border-color: var(--accent)
+  }
+
+  .filter-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.15)
+  }
+
+  .random-btn {
+    background: linear-gradient(135deg, var(--accent), #7ecdd6);
+    border: none;
+    border-radius: 8px;
+    padding: 0.4rem 0.9rem;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.15s;
+    margin-left: auto
+  }
+
+  .random-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.35)
+  }
+
   .res-info {
     font-size: 0.75rem;
     color: var(--text3);
@@ -850,6 +903,80 @@
 
   .mkb:hover {
     color: var(--text)
+  }
+
+  .similar-section {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 1.2rem 1.5rem;
+    margin-top: 1rem
+  }
+
+  .calendar-section {
+    margin-bottom: 2rem
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.8rem
+  }
+
+  .calendar-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    padding: 0.9rem;
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+    transition: 0.15s
+  }
+
+  .calendar-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px)
+  }
+
+  .calendar-thumb {
+    width: 60px;
+    height: 85px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--bg3)
+  }
+
+  .calendar-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover
+  }
+
+  .calendar-info {
+    flex: 1;
+    min-width: 0
+  }
+
+  .calendar-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+  }
+
+  .calendar-ep {
+    font-size: 0.72rem;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 0.2rem
+  }
+
+  .calendar-time {
+    font-size: 0.68rem;
+    color: var(--text3)
   }
 
   .mkb.on {
@@ -2103,13 +2230,27 @@
         onclick="goPage('list')">View All →</span></div>
     <div class="cw-grid"></div>
   </div>
+  <div class="sec" id="recSection" style="display:none">
+    <div class="sec-hd"><span class="sec-title">Recommended For You</span></div>
+    <div class="grid" id="recGrid"></div>
+  </div>
   <div class="sec">
-    <div class="sec-hd"><span class="sec-title">Trending</span><span class="sec-lnk" onclick="goPage('search')">See More
+    <div class="sec-hd"><span class="sec-title">Trending</span><span class="sec-lnk" onclick="loadSearchContent('trending')">See More
         →</span></div>
     <div class="grid" id="homeGrid"></div>
     <div class="grid-feed-status" id="homeTrendingStatus">Loading trending anime...</div>
-    <!-- my failed attempt at implementing infinite scroll because its not infinite   -->
-    <div id="homeTrendingSentinel" aria-hidden="true"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-hd"><span class="sec-title">Top Rated</span><span class="sec-lnk" onclick="loadSearchContent('toprated')">See More
+        →</span></div>
+    <div class="grid" id="topRatedGrid"></div>
+    <div class="grid-feed-status" id="topRatedStatus">Loading top rated anime...</div>
+  </div>
+  <div class="sec">
+    <div class="sec-hd"><span class="sec-title">Most Popular</span><span class="sec-lnk" onclick="loadSearchContent('popular')">See More
+        →</span></div>
+    <div class="grid" id="mostPopularGrid"></div>
+    <div class="grid-feed-status" id="mostPopularStatus">Loading most popular anime...</div>
   </div>
 </div>
 
@@ -2138,8 +2279,23 @@
       <div class="fp" onclick="setGenre(this,'mecha')">Mecha</div>
       <div class="fp" onclick="setGenre(this,'dubbed')">Dubbed</div>
     </div>
+    <div class="filter-row">
+      <select id="seasonFilter" class="filter-select" onchange="applyFilters()">
+        <option value="">All Seasons</option>
+        <option value="WINTER">Winter</option>
+        <option value="SPRING">Spring</option>
+        <option value="SUMMER">Summer</option>
+        <option value="FALL">Fall</option>
+      </select>
+      <select id="yearFilter" class="filter-select" onchange="applyFilters()">
+        <option value="">All Years</option>
+      </select>
+      <button class="random-btn" onclick="pickRandomAnime()">🎲 Random</button>
+    </div>
     <div class="res-info" id="resInfo">Showing all anime</div>
     <div class="grid" id="searchGrid"></div>
+    <div class="grid-feed-status" id="searchStatus"></div>
+    <div id="searchSentinel" aria-hidden="true"></div>
   </div>
 </div>
 
@@ -2177,12 +2333,22 @@
       </div>
     </div>
   </div>
+  <div class="similar-section" id="similarSection" style="display:none">
+    <div class="sec-hd"><span class="sec-title">Similar Anime</span></div>
+    <div class="grid" id="similarGrid"></div>
+  </div>
 </div>
 
 <!-- LIST -->
 <div class="page" id="page-list">
   <div class="list-wrap">
     <div class="list-hd"><span class="list-hd-t">My List</span></div>
+    <div class="calendar-section">
+      <div class="sec-hd"><span class="sec-title">Upcoming Releases</span><span class="sec-lnk" onclick="loadUpcomingCalendar()">Refresh ↻</span></div>
+      <div class="calendar-grid" id="calendarGrid">
+        <div style="padding:2rem;text-align:center;color:var(--text3);font-size:0.82rem">Loading upcoming releases...</div>
+      </div>
+    </div>
     <table class="lt">
       <thead>
         <tr>
@@ -2201,7 +2367,7 @@
 <div id="toast"></div>
 
 <footer class="footer">
-  Made by <a href="https://github.com/Thecosmiccat" target="_blank">Thecosmiccat</a> >⩊< </footer>
+  Made by <a href="https://github.com/Thecosmiccat" target="_blank">Thecosmiccat</a> >⩊<  v2.4</footer>
   <!-- Ya i added a cat emoticon in the footer deal with it :P -->
 
     <script>
@@ -2364,6 +2530,10 @@
           clearCountdown();
         }
         if (id === 'home') loadCW();
+        if (id === 'list') {
+          loadMyList();
+          loadUpcomingCalendar();
+        }
       }
 
       function toast(msg) {
@@ -2504,21 +2674,22 @@
         }));
       }
 
-      async function fetchAnilistPage(query, genre, page = 1, perPage = 50) {
+      async function fetchAnilistPage(query, genre, page = 1, perPage = 50, season = '', year = '', sort = 'TRENDING_DESC') {
         const q = `
-  query ($page: Int, $perPage: Int, $search: String, $genre: String) {
+  query ($page: Int, $perPage: Int, $search: String, $genre: String, $season: MediaSeason, $seasonYear: Int, $sort: [MediaSort]) {
     Page (page: $page, perPage: $perPage) {
       pageInfo {
         currentPage
         hasNextPage
       }
-      media (search: $search, genre: $genre, type: ANIME, sort: [TRENDING_DESC], isAdult: false) {
+      media (search: $search, genre: $genre, season: $season, seasonYear: $seasonYear, type: ANIME, sort: $sort, isAdult: false) {
         id
         idMal
         title { romaji english }
         episodes
         nextAiringEpisode { episode }
         averageScore
+        popularity
         coverImage { large }
         bannerImage
         }
@@ -2526,12 +2697,14 @@
   }`;
   // no more nsfw anime search results for you, sorry not sorry :P
 
-        const variables = { page, perPage };
+        const variables = { page, perPage, sort };
         if (query) variables.search = query;
         if (genre && genre !== 'dubbed') {
           if (genre === 'sci-fi') variables.genre = 'Sci-Fi';
           else variables.genre = genre.charAt(0).toUpperCase() + genre.slice(1);
         }
+        if (season) variables.season = season;
+        if (year) variables.seasonYear = parseInt(year);
         try {
           const res = await fetch('https://graphql.anilist.co', {
             method: 'POST',
@@ -2550,38 +2723,85 @@
         }
       }
 
-      async function searchAnilist(query, genre) {
-        const result = await fetchAnilistPage(query, genre, 1, 50);
+      async function searchAnilist(query, genre, season = '', year = '') {
+        const result = await fetchAnilistPage(query, genre, 1, 50, season, year);
         return result.items;
       }
 
       let searchSeq = 0;
       let defaultSearchData = null;
       let searchDebounceTimer = null;
+      let searchPage = 1;
+      let searchLoading = false;
+      let searchHasNextPage = true;
+      let searchSeen = new Set();
+      let currentSearchSort = 'TRENDING_DESC';
+      let currentSearchQuery = '';
+      let currentSearchGenre = '';
+      let currentSearchSeason = '';
+      let currentSearchYear = '';
+      let searchObserver = null;
 
       function debouncedSearch(q) {
         clearTimeout(searchDebounceTimer);
         searchDebounceTimer = setTimeout(() => doSearch(q), 600);
       }
 
-      async function doSearch(q) {
+      async function doSearch(q, reset = true) {
         const seq = ++searchSeq;
         q = q.trim();
+        const season = document.getElementById('seasonFilter').value;
+        const year = document.getElementById('yearFilter').value;
 
-        if (!q && !curGenre && defaultSearchData && defaultSearchData.length) {
+        if (reset) {
+          searchPage = 1;
+          searchHasNextPage = true;
+          searchSeen = new Set();
+          currentSearchQuery = q;
+          currentSearchGenre = curGenre;
+          currentSearchSeason = season;
+          currentSearchYear = year;
+          document.getElementById('searchGrid').innerHTML = '';
+          if (searchObserver) searchObserver.disconnect();
+        }
+
+        if (!q && !curGenre && !season && !year && defaultSearchData && defaultSearchData.length && reset) {
           document.getElementById('resInfo').textContent = 'Showing all anime';
           renderGrid('searchGrid', defaultSearchData);
           return;
         }
 
-        if (q || curGenre) document.getElementById('resInfo').textContent = 'Searching...';
-        const res = await searchAnilist(q, curGenre);
+        if (q || curGenre || season || year) document.getElementById('resInfo').textContent = 'Searching...';
+        
+        searchLoading = true;
+        const result = await fetchAnilistPage(q, curGenre, searchPage, 50, season, year, currentSearchSort);
+        const freshItems = result.items.filter(item => {
+          if (searchSeen.has(item.id)) return false;
+          searchSeen.add(item.id);
+          return true;
+        });
+        searchLoading = false;
 
         if (seq !== searchSeq) return;
-        if (!q && !curGenre && res.length > 0) defaultSearchData = res;
+        if (!q && !curGenre && !season && !year && freshItems.length > 0 && reset) defaultSearchData = freshItems;
 
-        document.getElementById('resInfo').textContent = `${res.length} result${res.length !== 1 ? 's' : ''}${q ? ' for "' + q + '"' : ''}${curGenre ? ' · ' + curGenre : ''}`;
-        renderGrid('searchGrid', res);
+        if (freshItems.length) appendGrid('searchGrid', freshItems, true);
+        searchHasNextPage = result.hasNextPage;
+        searchPage += 1;
+
+        let filterText = '';
+        if (curGenre) filterText += curGenre;
+        if (season) filterText += (filterText ? ' · ' : '') + season;
+        if (year) filterText += (filterText ? ' · ' : '') + year;
+        
+        document.getElementById('resInfo').textContent = `${document.getElementById('searchGrid').children.length} result${document.getElementById('searchGrid').children.length !== 1 ? 's' : ''}${q ? ' for "' + q + '"' : ''}${filterText ? ' · ' + filterText : ''}`;
+        
+        if (searchHasNextPage) {
+          document.getElementById('searchStatus').textContent = 'Scroll for more results';
+          initSearchScroll();
+        } else {
+          document.getElementById('searchStatus').textContent = 'You reached the end';
+        }
       }
 
       function setGenre(el, g) {
@@ -2589,6 +2809,80 @@
         el.classList.add('on');
         curGenre = g;
         doSearch(document.getElementById('searchInput').value);
+      }
+
+      function applyFilters() {
+        doSearch(document.getElementById('searchInput').value);
+      }
+
+      function initSearchScroll() {
+        const sentinel = document.getElementById('searchSentinel');
+        if (!sentinel || typeof IntersectionObserver === 'undefined') return;
+
+        if (searchObserver) searchObserver.disconnect();
+
+        searchObserver = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && !searchLoading && searchHasNextPage) {
+              doSearch(currentSearchQuery, false);
+            }
+          });
+        }, { rootMargin: '300px 0px' });
+
+        searchObserver.observe(sentinel);
+      }
+
+      async function loadSearchContent(type) {
+        goPage('search');
+        document.getElementById('searchInput').value = '';
+        document.querySelectorAll('.filters .fp').forEach(p => p.classList.remove('on'));
+        document.querySelector('.filters .fp').classList.add('on');
+        curGenre = '';
+        document.getElementById('seasonFilter').value = '';
+        document.getElementById('yearFilter').value = '';
+        
+        currentSearchSort = 'TRENDING_DESC';
+        let title = 'Trending Anime';
+        
+        if (type === 'toprated') {
+          currentSearchSort = 'SCORE_DESC';
+          title = 'Top Rated Anime';
+        } else if (type === 'popular') {
+          currentSearchSort = 'POPULARITY_DESC';
+          title = 'Most Popular Anime';
+        }
+        
+        document.querySelector('.search-wrap > div:first-child').textContent = title;
+        
+        await doSearch('', true);
+      }
+
+      function initializeYearFilter() {
+        const yearSelect = document.getElementById('yearFilter');
+        const currentYear = new Date().getFullYear();
+        for (let year = currentYear; year >= 1990; year--) {
+          const option = document.createElement('option');
+          option.value = year;
+          option.textContent = year;
+          yearSelect.appendChild(option);
+        }
+      }
+
+      async function pickRandomAnime() {
+        toast('Finding a random anime for you...');
+        const season = document.getElementById('seasonFilter').value;
+        const year = document.getElementById('yearFilter').value;
+        const genre = curGenre;
+        
+        const res = await searchAnilist('', genre, season, year);
+        if (res.length === 0) {
+          toast('No anime found with current filters');
+          return;
+        }
+        
+        const randomAnime = res[Math.floor(Math.random() * res.length)];
+        toast(`Random pick: ${randomAnime.title}`);
+        watchAnime(randomAnime);
       }
 
       function watchAnime(a) {
@@ -2605,6 +2899,7 @@
         fetchSeasons(a.id);
         fetchAiringInfo(a.id);
         fetchEpisodeTitles(a.id, a, epCount);
+        fetchSimilarAnime(a.id);
       }
 
       async function fetchEpisodeTitles(id, a, epCount) {
@@ -2706,6 +3001,34 @@
           }
         } catch (e) { }
       }
+
+      async function fetchSimilarAnime(id) {
+        const q = `query($id: Int){ Media(id: $id) { recommendations { edges { node { mediaRecommendation { id idMal title { english romaji } episodes averageScore coverImage { large } bannerImage } } } } } }`;
+        try {
+          const res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, variables: { id } }) });
+          const d = await res.json();
+          if (d.data && d.data.Media.recommendations.edges.length > 0) {
+            const similar = d.data.Media.recommendations.edges.slice(0, 6).map(e => {
+              const m = e.node.mediaRecommendation;
+              return {
+                id: m.id,
+                malId: m.idMal,
+                title: m.title.english || m.title.romaji || "Unknown Title",
+                eps: m.episodes || 24,
+                score: m.averageScore ? (m.averageScore / 10).toFixed(1) : '?',
+                img: m.coverImage.large,
+                banner: m.bannerImage || null,
+                dubbed: true
+              };
+            });
+            const similarSection = document.getElementById('similarSection');
+            const similarGrid = document.getElementById('similarGrid');
+            similarGrid.innerHTML = '';
+            similarSection.style.display = 'block';
+            appendGrid('similarGrid', similar, true);
+          }
+        } catch (e) { }
+      }
       // wtf is this spaghetti code for handling season switching? yes. yes it is. but it works so who cares :P
 
       function switchSeason(val) {
@@ -2764,6 +3087,60 @@
             });
           }
         } catch (e) { }
+      }
+
+      async function loadUpcomingCalendar() {
+        const f = JSON.parse(localStorage.getItem('followed') || '[]');
+        const grid = document.getElementById('calendarGrid');
+        if (!f.length) { 
+          grid.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text3);font-size:0.82rem">Follow some anime to see upcoming releases!</div>';
+          return;
+        }
+
+        grid.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text3);font-size:0.82rem">Loading upcoming releases...</div>';
+
+        const q = `
+  query ($greater: Int, $ids: [Int]) {
+    Page (page: 1, perPage: 50) {
+      airingSchedules (sort: TIME, airingAt_greater: $greater, mediaId_in: $ids) {
+        episode
+        airingAt
+        media { id idMal title { english romaji } coverImage { large } format isAdult }
+      }
+    }
+  }`;
+
+        try {
+          const res = await fetch('https://graphql.anilist.co', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: q, variables: { greater: Math.floor(Date.now() / 1000), ids: f } })
+          });
+          const data = await res.json();
+          if (data.data && data.data.Page.airingSchedules.length > 0) {
+            const schedules = data.data.Page.airingSchedules.filter(s => s.media.format !== 'MOVIE' && !s.media.isAdult).slice(0, 20);
+            grid.innerHTML = '';
+            schedules.forEach(s => {
+              const t = s.media.title.english || s.media.title.romaji;
+              const airingDate = new Date(s.airingAt * 1000);
+              const timeStr = airingDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+              const obj = { id: s.media.id, malId: s.media.idMal, title: t.replace(/'/g, "\'"), eps: 24, dubbed: true, img: s.media.coverImage.large };
+              
+              grid.innerHTML += `<div class="calendar-item" onclick='watchAnime(${JSON.stringify(obj).replace(/'/g, "&#39;")})'>
+                <div class="calendar-thumb"><img src="${s.media.coverImage.large}" loading="lazy"></div>
+                <div class="calendar-info">
+                  <div class="calendar-title" title="${t}">${t}</div>
+                  <div class="calendar-ep">Episode ${s.episode}</div>
+                  <div class="calendar-time">${timeStr}</div>
+                </div>
+              </div>`;
+            });
+          } else {
+            grid.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text3);font-size:0.82rem">No upcoming releases found for followed anime</div>';
+          }
+        } catch (e) {
+          grid.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text3);font-size:0.82rem">Error loading upcoming releases</div>';
+        }
       }
       function toggleFollowFor(id, btn) {
         let f = JSON.parse(localStorage.getItem('followed') || '[]');
@@ -2928,6 +3305,57 @@
         } catch (e) { }
       }
 
+      async function loadRecommendations() {
+        const cw = JSON.parse(localStorage.getItem('cw') || '[]');
+        const recSection = document.getElementById('recSection');
+        const recGrid = document.getElementById('recGrid');
+        
+        if (!cw.length) {
+          recSection.style.display = 'none';
+          return;
+        }
+
+        const ids = cw.slice(0, 10).map(x => x.id);
+        const q = `query($ids: [Int]){ Page(page:1, perPage:10){ media(id_in: $ids, isAdult: false){ recommendations { edges { node { mediaRecommendation { id idMal title { english romaji } episodes averageScore coverImage { large } bannerImage } } } } } } }`;
+        
+        try {
+          const res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, variables: { ids } }) });
+          const d = await res.json();
+          if (d.data) {
+            const allRecs = [];
+            d.data.Page.media.forEach(m => {
+              if (m.recommendations && m.recommendations.edges) {
+                m.recommendations.edges.slice(0, 10).forEach(e => {
+                  const rec = e.node.mediaRecommendation;
+                  if (rec && !allRecs.find(r => r.id === rec.id)) {
+                    allRecs.push({
+                      id: rec.id,
+                      malId: rec.idMal,
+                      title: rec.title.english || rec.title.romaji || "Unknown Title",
+                      eps: rec.episodes || 24,
+                      score: rec.averageScore ? (rec.averageScore / 10).toFixed(1) : '?',
+                      img: rec.coverImage.large,
+                      banner: rec.bannerImage || null,
+                      dubbed: true
+                    });
+                  }
+                });
+              }
+            });
+            
+            if (allRecs.length > 0) {
+              recSection.style.display = 'block';
+              recGrid.innerHTML = '';
+              appendGrid('recGrid', allRecs.slice(0, 50), true);
+            } else {
+              recSection.style.display = 'none';
+            }
+          }
+        } catch (e) {
+          recSection.style.display = 'none';
+        }
+      }
+
       function removeCW(id) {
         let cw = JSON.parse(localStorage.getItem('cw') || '[]');
         cw = cw.filter(c => c.id !== id);
@@ -3039,22 +3467,16 @@
 
       async function loadTrendingPage(reset = false) {
         if (trendingLoading) return;
-        if (!reset && !trendingHasNextPage) return;
 
         if (reset) {
           trendingPage = 1;
-          trendingHasNextPage = true;
           trendingSeen = new Set();
           document.getElementById('homeGrid').innerHTML = '';
           setTrendingStatus('Loading trending anime...');
-        } else {
-          setTrendingStatus('Loading more trending anime...');
         }
 
-        // this is going to be so rate limited but idc, at least it will load something for the users instead of just showing an error message :P
-
         trendingLoading = true;
-        const { items, hasNextPage } = await fetchAnilistPage('', '', trendingPage, 25);
+        const { items } = await fetchAnilistPage('', '', trendingPage, 25);
         const freshItems = items.filter(item => {
           if (trendingSeen.has(item.id)) return false;
           trendingSeen.add(item.id);
@@ -3065,22 +3487,14 @@
 
         if (freshItems.length) appendGrid('homeGrid', freshItems, true);
 
-        trendingHasNextPage = hasNextPage;
-        trendingPage += 1;
         trendingLoading = false;
 
         if (!document.getElementById('homeGrid').children.length) {
-          setTrendingStatus('Could not load trending anime right now. (Probably due to rate limits, but who knows with these APIs :P) Try refreshing the page?');
+          setTrendingStatus('Could not load trending anime right now. Try refreshing the page?');
           return;
         }
 
-        if (!trendingHasNextPage) {
-          setTrendingStatus('You reached the end of the trending list, pick sum already! :)');
-          return;
-        }
-        // only indecisive anime fans would complain about not having more than 100 trending anime to scroll through anyway :P
-
-        setTrendingStatus('Scroll for more trending anime');
+        setTrendingStatus('');
       }
 
       function initTrendingScroll() {
@@ -3097,15 +3511,41 @@
       }
 
       async function loadTrending() {
-        await loadTrendingPage(true);
-        initTrendingScroll();
+        loadTrendingPage(true);
       }
-      loadTrending();
-      doSearch('');
-      fetchNotifications();
-      loadMyList();
-      loadCW();
-      // restore toggle UI from saved prefs
+
+      async function loadTopRated() {
+        const statusEl = document.getElementById('topRatedStatus');
+        statusEl.textContent = 'Loading top rated anime...';
+        try {
+          const result = await fetchAnilistPage('', '', 1, 25, '', '', 'SCORE_DESC');
+          if (result.items.length) {
+            appendGrid('topRatedGrid', result.items, true);
+            statusEl.textContent = 'Top rated anime loaded';
+          } else {
+            statusEl.textContent = 'Could not load top rated anime';
+          }
+        } catch (e) {
+          statusEl.textContent = 'Error loading top rated anime';
+        }
+      }
+
+      async function loadMostPopular() {
+        const statusEl = document.getElementById('mostPopularStatus');
+        statusEl.textContent = 'Loading most popular anime...';
+        try {
+          const result = await fetchAnilistPage('', '', 1, 25, '', '', 'POPULARITY_DESC');
+          if (result.items.length) {
+            appendGrid('mostPopularGrid', result.items, true);
+            statusEl.textContent = 'Most popular anime loaded';
+          } else {
+            statusEl.textContent = 'Could not load most popular anime';
+          }
+        } catch (e) {
+          statusEl.textContent = 'Error loading most popular anime';
+        }
+      }
+
       document.getElementById('srcVideasy').classList.toggle('on', curSource === 'videasy');
       document.getElementById('srcVidnest').classList.toggle('on', curSource === 'vidnest');
       document.getElementById('srcAnimepahe').classList.toggle('on', curSource === 'animepahe');
@@ -3125,6 +3565,16 @@
       buildThemeSwatches();
       const savedTheme = parseInt(localStorage.getItem('pref_theme') || '0');
       if (savedTheme > 0) applyTheme(savedTheme);
+
+      // initialize year filter dropdown
+      initializeYearFilter();
+
+      // load home page sections
+      loadCW();
+      loadRecommendations();
+      loadTrending();
+      loadTopRated();
+      loadMostPopular();
 
       // Hero floating particles
       (function() {
@@ -3164,6 +3614,3 @@
     </script>
 
     <!-- Yo is anyone acually reading this? -->
-    <footer style="text-align:center;padding:1.5rem;color:var(--text3);font-size:0.75rem;font-family:'DM Sans',sans-serif;border-top:1px solid var(--border);margin-top:2rem;">
-      v2.3
-    </footer>
