@@ -36,18 +36,18 @@
   }
 
   nav {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
-    background: var(--nav-bg);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(var(--accent-rgb), 0.15);
+    background: var(--bg);
     padding: 0 1.5rem;
     height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem
+    gap: 1rem;
   }
 
   .logo {
@@ -115,6 +115,110 @@
     border: 1px solid rgba(34, 197, 94, 0.25);
     color: var(--green);
     font-weight: 500
+  }
+
+  /* Hide hamburger menu on desktop */
+  .hamburger {
+    display: none;
+  }
+  
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 280px;
+    height: 100vh;
+    background: var(--bg);
+    z-index: 10000;
+    padding: 1rem;
+    padding-top: 60px;
+    transition: left 0.3s ease;
+  }
+  
+  .mobile-menu.open {
+    display: block !important;
+    left: 0;
+  }
+  
+  /* Body blur when mobile menu is open */
+  body.menu-open .page {
+    pointer-events: none;
+  }
+  
+  body.menu-open {
+    overflow: hidden;
+  }
+  
+  .mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 0.5rem 0;
+  }
+  
+  .mobile-menu-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  
+  .mobile-menu-close {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .mobile-menu-close:hover {
+    background: var(--bg4);
+    color: var(--text);
+  }
+  
+  .mobile-menu-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .mobile-nl {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    color: var(--text2);
+    border: none;
+    background: var(--bg3);
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+  
+  .mobile-nl:hover {
+    color: var(--text);
+    background: var(--bg4);
+    transform: translateX(4px);
+  }
+  
+  .mobile-nl.active {
+    color: #fff;
+    background: var(--accent);
+    box-shadow: 0 4px 18px rgba(var(--accent-rgb), 0.35);
+  }
+  
+  .mobile-nl.active:hover {
+    transform: translateX(4px);
+    box-shadow: 0 6px 24px rgba(var(--accent-rgb), 0.45);
   }
 
   .page {
@@ -1389,19 +1493,65 @@
     nav {
       padding: 0 1rem;
       height: 56px;
+      justify-content: space-between;
+      position: relative;
     }
     
+    /* Center the logo */
     .logo {
       font-size: 1.2rem;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
     
+    /* Hide desktop navigation */
     .nav-links {
-      gap: 2px;
+      display: none !important;
     }
     
-    .nl {
-      font-size: 0.65rem;
-      padding: 0.35rem 0.8rem;
+    /* Show hamburger menu on left */
+    .hamburger {
+      display: flex !important;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 24px;
+      height: 24px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 101;
+      pointer-events: auto;
+      position: relative;
+      order: -1;
+    }
+    
+    .hamburger span {
+      width: 18px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      transform-origin: 1px;
+    }
+    
+    /* Hamburger animation when open */
+    .hamburger.open span:nth-child(1) {
+      transform: rotate(45deg);
+    }
+    
+    .hamburger.open span:nth-child(2) {
+      opacity: 0;
+    }
+    
+    .hamburger.open span:nth-child(3) {
+      transform: rotate(-45deg);
+    }
+    
+    /* Move nav-r to the right */
+    .nav-r {
+      margin-left: auto;
     }
     
     /* Hero section */
@@ -1530,22 +1680,53 @@
     nav {
       padding: 0 0.75rem;
       height: 52px;
+      justify-content: space-between;
+      position: relative;
     }
     
+    /* Center the logo */
     .logo {
       font-size: 1.1rem;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
     
+    /* Hide desktop navigation */
     .nav-links {
-      gap: 1px;
+      display: none !important;
     }
     
-    .nl {
-      font-size: 0.6rem;
-      padding: 0.3rem 0.6rem;
+    /* Hamburger menu stays on left */
+    .hamburger {
+      order: -1;
     }
     
+    .hamburger span {
+      width: 18px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      transform-origin: 1px;
+    }
+    
+    /* Hamburger animation when open */
+    .hamburger.open span:nth-child(1) {
+      transform: rotate(45deg);
+    }
+    
+    .hamburger.open span:nth-child(2) {
+      opacity: 0;
+    }
+    
+    .hamburger.open span:nth-child(3) {
+      transform: rotate(-45deg);
+    }
+    
+    /* Nav-r stays on right */
     .nav-r {
+      margin-left: auto;
       gap: 0.5rem;
     }
     
@@ -1801,14 +1982,43 @@
 </style>
 
 <nav>
+  <!-- Mobile Hamburger Menu -->
+  <button class="hamburger" id="hamburgerMenu" onclick="toggleMobileMenu()" aria-label="Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  
   <span class="logo" onclick="goPage('home')">cat-ime ฅ^>⩊<^ ฅ</span>
   <!-- um, the emoticon in the title might fuck up on sume devices -->
+      
+      <!-- Desktop Navigation -->
       <div class="nav-links">
         <button class="nl active" onclick="goPage('home')">Home</button>
         <button class="nl" onclick="goPage('search')">Search</button>
         <button class="nl" onclick="goPage('watch')">Watch</button>
         <button class="nl" onclick="goPage('list')">My List</button>
       </div>
+      
+      <!-- Mobile Menu Panel -->
+      <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+          <span class="mobile-menu-title">Menu</span>
+          <button class="mobile-menu-close" onclick="toggleMobileMenu()" aria-label="Close menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="mobile-menu-links">
+          <button class="mobile-nl active" onclick="goPage('home'); toggleMobileMenu()">Home</button>
+          <button class="mobile-nl" onclick="goPage('search'); toggleMobileMenu()">Search</button>
+          <button class="mobile-nl" onclick="goPage('watch'); toggleMobileMenu()">Watch</button>
+          <button class="mobile-nl" onclick="goPage('list'); toggleMobileMenu()">My List</button>
+        </div>
+      </div>
+      
       <div class="nav-r" style="display:flex;align-items:center;gap:0.75rem">
         <div style="cursor:pointer;position:relative" onclick="toggleNP()">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"
@@ -2066,6 +2276,27 @@
       function toggleSP() {
         document.getElementById('npPanel').classList.remove('open');
         document.getElementById('spPanel').classList.toggle('open');
+      }
+
+      function toggleMobileMenu() {
+        const hamburger = document.getElementById('hamburgerMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        if (!hamburger || !mobileMenu) {
+          return;
+        }
+        
+        hamburger.classList.toggle('open');
+        mobileMenu.classList.toggle('open');
+        document.body.classList.toggle('menu-open');
+        
+        const isOpen = mobileMenu.classList.contains('open');
+        
+        // Close other panels when mobile menu opens
+        if (isOpen) {
+          document.getElementById('npPanel').classList.remove('open');
+          document.getElementById('spPanel').classList.remove('open');
+        }
       }
 
       function clearCW() {
