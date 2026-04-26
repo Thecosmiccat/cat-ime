@@ -1587,6 +1587,97 @@
   }
   .th-sw:hover { transform: scale(1.18) }
   .th-sw.active { outline-color: var(--text) }
+  .custom-theme-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg3);
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.15s;
+    flex-shrink: 0
+  }
+  .custom-theme-btn:hover {
+    border-color: var(--accent);
+    transform: scale(1.1)
+  }
+  #customThemePanel {
+    display: none;
+    position: fixed;
+    top: 62px;
+    right: 1rem;
+    z-index: 150;
+    width: 300px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 0.85rem;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(var(--accent-rgb),0.08)
+  }
+  #customThemePanel.open { display: block }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--border)
+  }
+  .panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700
+  }
+  .panel-close {
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: 0.15s
+  }
+  .panel-close:hover {
+    background: var(--bg3);
+    color: var(--text)
+  }
+  .custom-theme-content {
+    padding: 0
+  }
+  .color-picker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.7rem
+  }
+  .color-picker-row label {
+    font-size: 0.75rem;
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif
+  }
+  .color-picker-row input[type="color"] {
+    width: 50px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: none
+  }
   .sp-btn-d {
     font-size: 0.74rem;
     padding: 0.32rem 0.7rem;
@@ -2198,7 +2289,10 @@
   </div>
 
   <div class="sp-sec">Theme</div>
-  <div class="th-swatches" id="thSwatches"></div>
+  <div style="display:flex;align-items:center;gap:0.5rem">
+    <div class="th-swatches" id="thSwatches"></div>
+    <button class="custom-theme-btn" onclick="openCustomTheme()" title="Create custom theme">+</button>
+  </div>
 
   <div class="sp-sec">Data</div>
   <div class="sp-row" style="flex-direction:column;align-items:flex-start;gap:0.4rem">
@@ -2206,6 +2300,57 @@
     <button class="sp-btn-d" onclick="clearHistory()">Clear all watch progress</button>
     <button class="sp-btn-d" onclick="clearList()">Clear my list</button>
     <button class="sp-btn-e" onclick="exportList()">Export list as JSON</button>
+  </div>
+</div>
+
+<!-- Custom Theme Panel -->
+<div class="panel" id="customThemePanel">
+  <div class="panel-header">
+    <span class="panel-title">Custom Theme</span>
+    <button class="panel-close" onclick="closeCustomTheme()">×</button>
+  </div>
+  <div class="custom-theme-content">
+    <div class="color-picker-row">
+      <label>Accent</label>
+      <input type="color" id="ctAccent" value="#4ca1af">
+    </div>
+    <div class="color-picker-row">
+      <label>Background</label>
+      <input type="color" id="ctBg" value="#1a2530">
+    </div>
+    <div class="color-picker-row">
+      <label>Background 2</label>
+      <input type="color" id="ctBg2" value="#243342">
+    </div>
+    <div class="color-picker-row">
+      <label>Background 3</label>
+      <input type="color" id="ctBg3" value="#2c3e50">
+    </div>
+    <div class="color-picker-row">
+      <label>Background 4</label>
+      <input type="color" id="ctBg4" value="#354b5e">
+    </div>
+    <div class="color-picker-row">
+      <label>Card</label>
+      <input type="color" id="ctCard" value="#202f3d">
+    </div>
+    <div class="color-picker-row">
+      <label>Text</label>
+      <input type="color" id="ctText" value="#eef2f7">
+    </div>
+    <div class="color-picker-row">
+      <label>Text 2</label>
+      <input type="color" id="ctText2" value="#8da3b3">
+    </div>
+    <div class="color-picker-row">
+      <label>Text 3</label>
+      <input type="color" id="ctText3" value="#5a7383">
+    </div>
+    <div class="color-picker-row">
+      <label>Border</label>
+      <input type="color" id="ctBorder" value="#4ca1af">
+    </div>
+    <button class="sp-btn-e" onclick="applyCustomTheme()" style="width:100%;margin-top:1rem">Apply Theme</button>
   </div>
 </div>
 
@@ -2437,6 +2582,75 @@
           s.onclick = () => applyTheme(i);
           wrap.appendChild(s);
         });
+      }
+
+      function openCustomTheme() {
+        document.getElementById('spPanel').classList.remove('open');
+        document.getElementById('customThemePanel').classList.add('open');
+        
+        const currentTheme = themes[parseInt(localStorage.getItem('pref_theme') || '0')];
+        document.getElementById('ctAccent').value = currentTheme.accent;
+        document.getElementById('ctBg').value = currentTheme.bg;
+        document.getElementById('ctBg2').value = currentTheme.bg2;
+        document.getElementById('ctBg3').value = currentTheme.bg3;
+        document.getElementById('ctBg4').value = currentTheme.bg4;
+        document.getElementById('ctCard').value = currentTheme.card;
+        document.getElementById('ctText').value = currentTheme.text;
+        document.getElementById('ctText2').value = currentTheme.text2;
+        document.getElementById('ctText3').value = currentTheme.text3;
+        document.getElementById('ctBorder').value = currentTheme.accent;
+      }
+
+      function closeCustomTheme() {
+        document.getElementById('customThemePanel').classList.remove('open');
+      }
+
+      function applyCustomTheme() {
+        const accent = document.getElementById('ctAccent').value;
+        const bg = document.getElementById('ctBg').value;
+        const bg2 = document.getElementById('ctBg2').value;
+        const bg3 = document.getElementById('ctBg3').value;
+        const bg4 = document.getElementById('ctBg4').value;
+        const card = document.getElementById('ctCard').value;
+        const text = document.getElementById('ctText').value;
+        const text2 = document.getElementById('ctText2').value;
+        const text3 = document.getElementById('ctText3').value;
+        const border = document.getElementById('ctBorder').value;
+        
+        const accentRgb = hexToRgb(accent);
+        const borderRgba = hexToRgba(border, 0.12);
+        
+        document.documentElement.style.setProperty('--accent', accent);
+        document.documentElement.style.setProperty('--accent-rgb', accentRgb.join(','));
+        document.documentElement.style.setProperty('--bg', bg);
+        document.documentElement.style.setProperty('--bg2', bg2);
+        document.documentElement.style.setProperty('--bg3', bg3);
+        document.documentElement.style.setProperty('--bg4', bg4);
+        document.documentElement.style.setProperty('--card', card);
+        document.documentElement.style.setProperty('--text', text);
+        document.documentElement.style.setProperty('--text2', text2);
+        document.documentElement.style.setProperty('--text3', text3);
+        document.documentElement.style.setProperty('--border', borderRgba);
+        
+        particleColor = accentRgb;
+        
+        localStorage.setItem('pref_theme', '-1');
+        localStorage.setItem('custom_theme', JSON.stringify({ accent, bg, bg2, bg3, bg4, card, text, text2, text3, border }));
+        
+        document.querySelectorAll('.th-sw').forEach(s => s.classList.remove('active'));
+        
+        closeCustomTheme();
+        toast('Custom theme applied');
+      }
+
+      function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 0, 0];
+      }
+
+      function hexToRgba(hex, alpha) {
+        const rgb = hexToRgb(hex);
+        return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
       }
 
       function toggleSP() {
