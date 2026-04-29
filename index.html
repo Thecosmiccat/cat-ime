@@ -2197,6 +2197,98 @@
       padding: 0.25rem 0.5rem;
     }
   }
+
+  /* ── NETFLIX-STYLE HORIZONTAL SCROLLING SECTIONS ── */
+  
+  .horizontal-scroll-container {
+    position: relative;
+    width: 100%;
+  }
+  
+  .horizontal-scroll {
+    display: flex;
+    gap: 0.7rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .horizontal-scroll::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .horizontal-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .horizontal-scroll::-webkit-scrollbar-thumb {
+    background: rgba(var(--accent-rgb), 0.28);
+    border-radius: 4px;
+  }
+  
+  .horizontal-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--accent-rgb), 0.52);
+  }
+  
+  .horizontal-scroll .acard {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    width: 128px;
+  }
+  
+  .horizontal-scroll .cw-card {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    width: 240px;
+  }
+  
+  .scroll-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(var(--bg2-rgb, 26, 37, 48), 0.9);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+  }
+  
+  .scroll-nav-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  .scroll-nav-btn.left {
+    left: -20px;
+  }
+  
+  .scroll-nav-btn.right {
+    right: -20px;
+  }
+  
+  .scroll-nav-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  /* Hide scroll buttons on mobile */
+  @media (max-width: 768px) {
+    .scroll-nav-btn {
+      display: none;
+    }
+  }
 </style>
 
 <nav>
@@ -2370,32 +2462,152 @@
       </div>
     </div>
   </div>
+  
   <div class="sec">
     <div class="sec-hd"><span class="sec-title">Continue Watching</span><span class="sec-lnk"
         onclick="goPage('list')">View All →</span></div>
-    <div class="cw-grid"></div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-nav-btn left" onclick="scrollSection('cwScroll', -300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="horizontal-scroll" id="cwScroll"></div>
+      <button class="scroll-nav-btn right" onclick="scrollSection('cwScroll', 300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
   </div>
+  
   <div class="sec" id="recSection" style="display:none">
     <div class="sec-hd"><span class="sec-title">Recommended For You</span></div>
-    <div class="grid" id="recGrid"></div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-nav-btn left" onclick="scrollSection('recScroll', -300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="horizontal-scroll" id="recScroll"></div>
+      <button class="scroll-nav-btn right" onclick="scrollSection('recScroll', 300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
   </div>
+  
   <div class="sec">
     <div class="sec-hd"><span class="sec-title">Trending</span><span class="sec-lnk" onclick="loadSearchContent('trending')">See More
         →</span></div>
-    <div class="grid" id="homeGrid"></div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-nav-btn left" onclick="scrollSection('trendingScroll', -300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="horizontal-scroll" id="trendingScroll"></div>
+      <button class="scroll-nav-btn right" onclick="scrollSection('trendingScroll', 300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
     <div class="grid-feed-status" id="homeTrendingStatus">Loading trending anime...</div>
   </div>
+  
   <div class="sec">
     <div class="sec-hd"><span class="sec-title">Top Rated</span><span class="sec-lnk" onclick="loadSearchContent('toprated')">See More
         →</span></div>
-    <div class="grid" id="topRatedGrid"></div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-nav-btn left" onclick="scrollSection('topRatedScroll', -300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="horizontal-scroll" id="topRatedScroll"></div>
+      <button class="scroll-nav-btn right" onclick="scrollSection('topRatedScroll', 300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
     <div class="grid-feed-status" id="topRatedStatus">Loading top rated anime...</div>
   </div>
+  
   <div class="sec">
     <div class="sec-hd"><span class="sec-title">Most Popular</span><span class="sec-lnk" onclick="loadSearchContent('popular')">See More
         →</span></div>
-    <div class="grid" id="mostPopularGrid"></div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-nav-btn left" onclick="scrollSection('popularScroll', -300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="horizontal-scroll" id="popularScroll"></div>
+      <button class="scroll-nav-btn right" onclick="scrollSection('popularScroll', 300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
     <div class="grid-feed-status" id="mostPopularStatus">Loading most popular anime...</div>
+  </div>
+  
+  <div class="sec">
+    <div class="sec-hd"><span class="sec-title">Action</span><span class="sec-lnk" onclick="loadSearchContent('action')">See More
+        →</span></div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-nav-btn left" onclick="scrollSection('actionScroll', -300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="horizontal-scroll" id="actionScroll"></div>
+      <button class="scroll-nav-btn right" onclick="scrollSection('actionScroll', 300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+    <div class="grid-feed-status" id="actionStatus">Loading action anime...</div>
+  </div>
+  
+  <div class="sec">
+    <div class="sec-hd"><span class="sec-title">Romance</span><span class="sec-lnk" onclick="loadSearchContent('romance')">See More
+        →</span></div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-nav-btn left" onclick="scrollSection('romanceScroll', -300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="horizontal-scroll" id="romanceScroll"></div>
+      <button class="scroll-nav-btn right" onclick="scrollSection('romanceScroll', 300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+    <div class="grid-feed-status" id="romanceStatus">Loading romance anime...</div>
+  </div>
+  
+  <div class="sec">
+    <div class="sec-hd"><span class="sec-title">Fantasy</span><span class="sec-lnk" onclick="loadSearchContent('fantasy')">See More
+        →</span></div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-nav-btn left" onclick="scrollSection('fantasyScroll', -300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="horizontal-scroll" id="fantasyScroll"></div>
+      <button class="scroll-nav-btn right" onclick="scrollSection('fantasyScroll', 300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+    <div class="grid-feed-status" id="fantasyStatus">Loading fantasy anime...</div>
+  </div>
+  
+  <div class="sec">
+    <div class="sec-hd"><span class="sec-title">Comedy</span><span class="sec-lnk" onclick="loadSearchContent('comedy')">See More
+        →</span></div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-nav-btn left" onclick="scrollSection('comedyScroll', -300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="horizontal-scroll" id="comedyScroll"></div>
+      <button class="scroll-nav-btn right" onclick="scrollSection('comedyScroll', 300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+    <div class="grid-feed-status" id="comedyStatus">Loading comedy anime...</div>
+  </div>
+  
+  <div class="sec">
+    <div class="sec-hd"><span class="sec-title">Sci-Fi</span><span class="sec-lnk" onclick="loadSearchContent('sci-fi')">See More
+        →</span></div>
+    <div class="horizontal-scroll-container">
+      <button class="scroll-nav-btn left" onclick="scrollSection('scifiScroll', -300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="horizontal-scroll" id="scifiScroll"></div>
+      <button class="scroll-nav-btn right" onclick="scrollSection('scifiScroll', 300)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+    <div class="grid-feed-status" id="scifiStatus">Loading sci-fi anime...</div>
   </div>
 </div>
 
@@ -2858,6 +3070,25 @@
           }
           el.appendChild(card);
           // CHILL OUT ANILIST, I'M NOT LOADING 1000 ANIME AT ONCE, STOP FUCKING UP MY ANIMATION DELAYS WITH YOUR SHITTY PAGINATION
+        });
+      }
+
+      function scrollSection(id, amount) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollBy({ left: amount, behavior: 'smooth' });
+        }
+      }
+
+      function appendHorizontalScroll(id, list, animate = false) {
+        const el = document.getElementById(id);
+        list.forEach((a, idx) => {
+          const card = makeCard(a);
+          if (animate) {
+            card.classList.add('fade-in');
+            card.style.animationDelay = `${Math.min(idx * 45, 360)}ms`;
+          }
+          el.appendChild(card);
         });
       }
 
@@ -3485,8 +3716,8 @@
 
       async function loadCW() {
         const cw = JSON.parse(localStorage.getItem('cw') || '[]');
-        const grid = document.querySelector('.cw-grid');
-        if (!cw.length) { grid.innerHTML = '<div style="font-size:0.8rem;color:var(--text3);padding:1rem 0">No continue watching history available. Start watching some anime!</div>'; return; }
+        const scroll = document.getElementById('cwScroll');
+        if (!cw.length) { scroll.innerHTML = '<div style="font-size:0.8rem;color:var(--text3);padding:1rem 0">No continue watching history available. Start watching some anime!</div>'; return; }
 
         const ids = cw.map(x => x.id);
         const q = `query($ids: [Int]){ Page(page:1, perPage:10){ media(id_in: $ids, isAdult: false){ id idMal title { english romaji } episodes averageScore coverImage { large } } } }`;
@@ -3494,7 +3725,7 @@
           const res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, variables: { ids } }) });
           const d = await res.json();
           if (d.data) {
-            grid.innerHTML = '';
+            scroll.innerHTML = '';
             cw.forEach(item => {
               const m = d.data.Page.media.find(x => x.id === item.id);
               if (!m) return;
@@ -3503,7 +3734,7 @@
               const pct = Math.min(100, (item.ep / total) * 100);
               const obj = { id: m.id, malId: m.idMal, title: t, eps: total, img: m.coverImage.large, dubbed: true, score: m.averageScore ? (m.averageScore / 10).toFixed(1) : '?' };
 
-              grid.innerHTML += `<div class="cw-card" onclick='resumeAnime(${JSON.stringify(obj).replace(/'/g, "&#39;")}, ${item.ep})'>
+              scroll.innerHTML += `<div class="cw-card" onclick='resumeAnime(${JSON.stringify(obj).replace(/'/g, "&#39;")}, ${item.ep})'>
              <div class="cw-thumb">
                <img src="${m.coverImage.large}">
                <div class="cw-rm" onclick="event.stopPropagation(); removeCW(${item.id})">×</div>
@@ -3522,7 +3753,7 @@
       async function loadRecommendations() {
         const cw = JSON.parse(localStorage.getItem('cw') || '[]');
         const recSection = document.getElementById('recSection');
-        const recGrid = document.getElementById('recGrid');
+        const recScroll = document.getElementById('recScroll');
         
         if (!cw.length) {
           recSection.style.display = 'none';
@@ -3559,8 +3790,8 @@
             
             if (allRecs.length > 0) {
               recSection.style.display = 'block';
-              recGrid.innerHTML = '';
-              appendGrid('recGrid', allRecs.slice(0, 50), true);
+              recScroll.innerHTML = '';
+              appendHorizontalScroll('recScroll', allRecs.slice(0, 50), true);
             } else {
               recSection.style.display = 'none';
             }
@@ -3685,12 +3916,13 @@
         if (reset) {
           trendingPage = 1;
           trendingSeen = new Set();
-          document.getElementById('homeGrid').innerHTML = '';
+          document.getElementById('trendingScroll').innerHTML = '';
           setTrendingStatus('Loading trending anime...');
         }
 
         trendingLoading = true;
-        const { items } = await fetchAnilistPage('', '', trendingPage, 25);
+        const { items, hasNextPage } = await fetchAnilistPage('', '', trendingPage, 25);
+        trendingHasNextPage = hasNextPage;
         const freshItems = items.filter(item => {
           if (trendingSeen.has(item.id)) return false;
           trendingSeen.add(item.id);
@@ -3699,11 +3931,11 @@
 
         if (trendingPage === 1 && freshItems.length) initHeroSlider(freshItems);
 
-        if (freshItems.length) appendGrid('homeGrid', freshItems, true);
+        if (freshItems.length) appendHorizontalScroll('trendingScroll', freshItems, true);
 
         trendingLoading = false;
 
-        if (!document.getElementById('homeGrid').children.length) {
+        if (!document.getElementById('trendingScroll').children.length) {
           setTrendingStatus('Could not load trending anime right now. Try refreshing the page?');
           return;
         }
@@ -3712,52 +3944,366 @@
       }
 
       function initTrendingScroll() {
-        const sentinel = document.getElementById('homeTrendingSentinel');
-        if (!sentinel || typeof IntersectionObserver === 'undefined') return;
+        const scroll = document.getElementById('trendingScroll');
+        if (!scroll || typeof IntersectionObserver === 'undefined') return;
 
         const observer = new IntersectionObserver(entries => {
           entries.forEach(entry => {
-            if (entry.isIntersecting) loadTrendingPage();
+            if (entry.isIntersecting && !trendingLoading && trendingHasNextPage) {
+              trendingPage += 1;
+              loadTrendingPage(false);
+            }
           });
-        }, { rootMargin: '300px 0px' });
+        }, { root: scroll, rootMargin: '300px 0px' });
 
-        observer.observe(sentinel);
+        scroll.addEventListener('scroll', () => {
+          if (scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 500 && !trendingLoading && trendingHasNextPage) {
+            trendingPage += 1;
+            loadTrendingPage(false);
+          }
+        });
       }
 
       async function loadTrending() {
         loadTrendingPage(true);
+        initTrendingScroll();
+      }
+
+      let topRatedPage = 1;
+      let topRatedLoading = false;
+      let topRatedHasNextPage = true;
+      let topRatedSeen = new Set();
+
+      async function loadTopRatedPage(reset = false) {
+        if (topRatedLoading) return;
+
+        if (reset) {
+          topRatedPage = 1;
+          topRatedSeen = new Set();
+          document.getElementById('topRatedScroll').innerHTML = '';
+          document.getElementById('topRatedStatus').textContent = 'Loading top rated anime...';
+        }
+
+        topRatedLoading = true;
+        const { items, hasNextPage } = await fetchAnilistPage('', '', topRatedPage, 25, '', '', 'SCORE_DESC');
+        topRatedHasNextPage = hasNextPage;
+        const freshItems = items.filter(item => {
+          if (topRatedSeen.has(item.id)) return false;
+          topRatedSeen.add(item.id);
+          return true;
+        });
+
+        if (freshItems.length) appendHorizontalScroll('topRatedScroll', freshItems, true);
+
+        topRatedLoading = false;
+
+        document.getElementById('topRatedStatus').textContent = '';
+      }
+
+      function initTopRatedScroll() {
+        const scroll = document.getElementById('topRatedScroll');
+        if (!scroll) return;
+
+        scroll.addEventListener('scroll', () => {
+          if (scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 500 && !topRatedLoading && topRatedHasNextPage) {
+            topRatedPage += 1;
+            loadTopRatedPage(false);
+          }
+        });
       }
 
       async function loadTopRated() {
-        const statusEl = document.getElementById('topRatedStatus');
-        statusEl.textContent = 'Loading top rated anime...';
-        try {
-          const result = await fetchAnilistPage('', '', 1, 25, '', '', 'SCORE_DESC');
-          if (result.items.length) {
-            appendGrid('topRatedGrid', result.items, true);
-            statusEl.textContent = 'Top rated anime loaded';
-          } else {
-            statusEl.textContent = 'Could not load top rated anime';
-          }
-        } catch (e) {
-          statusEl.textContent = 'Error loading top rated anime';
+        loadTopRatedPage(true);
+        initTopRatedScroll();
+      }
+
+      let mostPopularPage = 1;
+      let mostPopularLoading = false;
+      let mostPopularHasNextPage = true;
+      let mostPopularSeen = new Set();
+
+      async function loadMostPopularPage(reset = false) {
+        if (mostPopularLoading) return;
+
+        if (reset) {
+          mostPopularPage = 1;
+          mostPopularSeen = new Set();
+          document.getElementById('popularScroll').innerHTML = '';
+          document.getElementById('mostPopularStatus').textContent = 'Loading most popular anime...';
         }
+
+        mostPopularLoading = true;
+        const { items, hasNextPage } = await fetchAnilistPage('', '', mostPopularPage, 25, '', '', 'POPULARITY_DESC');
+        mostPopularHasNextPage = hasNextPage;
+        const freshItems = items.filter(item => {
+          if (mostPopularSeen.has(item.id)) return false;
+          mostPopularSeen.add(item.id);
+          return true;
+        });
+
+        if (freshItems.length) appendHorizontalScroll('popularScroll', freshItems, true);
+
+        mostPopularLoading = false;
+
+        document.getElementById('mostPopularStatus').textContent = '';
+      }
+
+      function initMostPopularScroll() {
+        const scroll = document.getElementById('popularScroll');
+        if (!scroll) return;
+
+        scroll.addEventListener('scroll', () => {
+          if (scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 500 && !mostPopularLoading && mostPopularHasNextPage) {
+            mostPopularPage += 1;
+            loadMostPopularPage(false);
+          }
+        });
       }
 
       async function loadMostPopular() {
-        const statusEl = document.getElementById('mostPopularStatus');
-        statusEl.textContent = 'Loading most popular anime...';
-        try {
-          const result = await fetchAnilistPage('', '', 1, 25, '', '', 'POPULARITY_DESC');
-          if (result.items.length) {
-            appendGrid('mostPopularGrid', result.items, true);
-            statusEl.textContent = 'Most popular anime loaded';
-          } else {
-            statusEl.textContent = 'Could not load most popular anime';
-          }
-        } catch (e) {
-          statusEl.textContent = 'Error loading most popular anime';
+        loadMostPopularPage(true);
+        initMostPopularScroll();
+      }
+
+      // Genre section loaders with infinite scroll
+      let actionPage = 1;
+      let actionLoading = false;
+      let actionHasNextPage = true;
+      let actionSeen = new Set();
+
+      async function loadActionPage(reset = false) {
+        if (actionLoading) return;
+
+        if (reset) {
+          actionPage = 1;
+          actionSeen = new Set();
+          document.getElementById('actionScroll').innerHTML = '';
+          document.getElementById('actionStatus').textContent = 'Loading action anime...';
         }
+
+        actionLoading = true;
+        const { items, hasNextPage } = await fetchAnilistPage('', 'action', actionPage, 25);
+        actionHasNextPage = hasNextPage;
+        const freshItems = items.filter(item => {
+          if (actionSeen.has(item.id)) return false;
+          actionSeen.add(item.id);
+          return true;
+        });
+
+        if (freshItems.length) appendHorizontalScroll('actionScroll', freshItems, true);
+
+        actionLoading = false;
+
+        document.getElementById('actionStatus').textContent = '';
+      }
+
+      function initActionScroll() {
+        const scroll = document.getElementById('actionScroll');
+        if (!scroll) return;
+
+        scroll.addEventListener('scroll', () => {
+          if (scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 500 && !actionLoading && actionHasNextPage) {
+            actionPage += 1;
+            loadActionPage(false);
+          }
+        });
+      }
+
+      async function loadAction() {
+        loadActionPage(true);
+        initActionScroll();
+      }
+
+      let romancePage = 1;
+      let romanceLoading = false;
+      let romanceHasNextPage = true;
+      let romanceSeen = new Set();
+
+      async function loadRomancePage(reset = false) {
+        if (romanceLoading) return;
+
+        if (reset) {
+          romancePage = 1;
+          romanceSeen = new Set();
+          document.getElementById('romanceScroll').innerHTML = '';
+          document.getElementById('romanceStatus').textContent = 'Loading romance anime...';
+        }
+
+        romanceLoading = true;
+        const { items, hasNextPage } = await fetchAnilistPage('', 'romance', romancePage, 25);
+        romanceHasNextPage = hasNextPage;
+        const freshItems = items.filter(item => {
+          if (romanceSeen.has(item.id)) return false;
+          romanceSeen.add(item.id);
+          return true;
+        });
+
+        if (freshItems.length) appendHorizontalScroll('romanceScroll', freshItems, true);
+
+        romanceLoading = false;
+
+        document.getElementById('romanceStatus').textContent = '';
+      }
+
+      function initRomanceScroll() {
+        const scroll = document.getElementById('romanceScroll');
+        if (!scroll) return;
+
+        scroll.addEventListener('scroll', () => {
+          if (scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 500 && !romanceLoading && romanceHasNextPage) {
+            romancePage += 1;
+            loadRomancePage(false);
+          }
+        });
+      }
+
+      async function loadRomance() {
+        loadRomancePage(true);
+        initRomanceScroll();
+      }
+
+      let fantasyPage = 1;
+      let fantasyLoading = false;
+      let fantasyHasNextPage = true;
+      let fantasySeen = new Set();
+
+      async function loadFantasyPage(reset = false) {
+        if (fantasyLoading) return;
+
+        if (reset) {
+          fantasyPage = 1;
+          fantasySeen = new Set();
+          document.getElementById('fantasyScroll').innerHTML = '';
+          document.getElementById('fantasyStatus').textContent = 'Loading fantasy anime...';
+        }
+
+        fantasyLoading = true;
+        const { items, hasNextPage } = await fetchAnilistPage('', 'fantasy', fantasyPage, 25);
+        fantasyHasNextPage = hasNextPage;
+        const freshItems = items.filter(item => {
+          if (fantasySeen.has(item.id)) return false;
+          fantasySeen.add(item.id);
+          return true;
+        });
+
+        if (freshItems.length) appendHorizontalScroll('fantasyScroll', freshItems, true);
+
+        fantasyLoading = false;
+
+        document.getElementById('fantasyStatus').textContent = '';
+      }
+
+      function initFantasyScroll() {
+        const scroll = document.getElementById('fantasyScroll');
+        if (!scroll) return;
+
+        scroll.addEventListener('scroll', () => {
+          if (scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 500 && !fantasyLoading && fantasyHasNextPage) {
+            fantasyPage += 1;
+            loadFantasyPage(false);
+          }
+        });
+      }
+
+      async function loadFantasy() {
+        loadFantasyPage(true);
+        initFantasyScroll();
+      }
+
+      let comedyPage = 1;
+      let comedyLoading = false;
+      let comedyHasNextPage = true;
+      let comedySeen = new Set();
+
+      async function loadComedyPage(reset = false) {
+        if (comedyLoading) return;
+
+        if (reset) {
+          comedyPage = 1;
+          comedySeen = new Set();
+          document.getElementById('comedyScroll').innerHTML = '';
+          document.getElementById('comedyStatus').textContent = 'Loading comedy anime...';
+        }
+
+        comedyLoading = true;
+        const { items, hasNextPage } = await fetchAnilistPage('', 'comedy', comedyPage, 25);
+        comedyHasNextPage = hasNextPage;
+        const freshItems = items.filter(item => {
+          if (comedySeen.has(item.id)) return false;
+          comedySeen.add(item.id);
+          return true;
+        });
+
+        if (freshItems.length) appendHorizontalScroll('comedyScroll', freshItems, true);
+
+        comedyLoading = false;
+
+        document.getElementById('comedyStatus').textContent = '';
+      }
+
+      function initComedyScroll() {
+        const scroll = document.getElementById('comedyScroll');
+        if (!scroll) return;
+
+        scroll.addEventListener('scroll', () => {
+          if (scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 500 && !comedyLoading && comedyHasNextPage) {
+            comedyPage += 1;
+            loadComedyPage(false);
+          }
+        });
+      }
+
+      async function loadComedy() {
+        loadComedyPage(true);
+        initComedyScroll();
+      }
+
+      let scifiPage = 1;
+      let scifiLoading = false;
+      let scifiHasNextPage = true;
+      let scifiSeen = new Set();
+
+      async function loadScifiPage(reset = false) {
+        if (scifiLoading) return;
+
+        if (reset) {
+          scifiPage = 1;
+          scifiSeen = new Set();
+          document.getElementById('scifiScroll').innerHTML = '';
+          document.getElementById('scifiStatus').textContent = 'Loading sci-fi anime...';
+        }
+
+        scifiLoading = true;
+        const { items, hasNextPage } = await fetchAnilistPage('', 'sci-fi', scifiPage, 25);
+        scifiHasNextPage = hasNextPage;
+        const freshItems = items.filter(item => {
+          if (scifiSeen.has(item.id)) return false;
+          scifiSeen.add(item.id);
+          return true;
+        });
+
+        if (freshItems.length) appendHorizontalScroll('scifiScroll', freshItems, true);
+
+        scifiLoading = false;
+
+        document.getElementById('scifiStatus').textContent = '';
+      }
+
+      function initScifiScroll() {
+        const scroll = document.getElementById('scifiScroll');
+        if (!scroll) return;
+
+        scroll.addEventListener('scroll', () => {
+          if (scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 500 && !scifiLoading && scifiHasNextPage) {
+            scifiPage += 1;
+            loadScifiPage(false);
+          }
+        });
+      }
+
+      async function loadScifi() {
+        loadScifiPage(true);
+        initScifiScroll();
       }
 
       document.getElementById('srcVideasy').classList.toggle('on', curSource === 'videasy');
@@ -3789,6 +4335,11 @@
       loadTrending();
       loadTopRated();
       loadMostPopular();
+      loadAction();
+      loadRomance();
+      loadFantasy();
+      loadComedy();
+      loadScifi();
 
       // Hero floating particles
       (function() {
