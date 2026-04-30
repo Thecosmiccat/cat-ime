@@ -2370,8 +2370,10 @@
     <div class="sp-row">
     <span>Source</span>
     <div class="sp-btns">
+      <!-- Temporarily disabled - sources are down
       <button class="db2" id="spSrcVideasy" onclick="setSrc('videasy')">Videasy</button>
       <button class="db2" id="spSrcVidnest" onclick="setSrc('vidnest')">Vidnest</button>
+      -->
       <button class="db2" id="spSrcAnimepahe" onclick="setSrc('animepahe')">AnimePahe</button>
     </div>
   </div>
@@ -2392,6 +2394,9 @@
     <button class="sp-btn-d" onclick="clearHistory()">Clear all watch progress</button>
     <button class="sp-btn-d" onclick="clearList()">Clear my list</button>
     <button class="sp-btn-e" onclick="exportList()">Export list as JSON</button>
+    <button class="sp-btn-e" onclick="exportAllData()">Export all data</button>
+    <button class="sp-btn-e" onclick="importAllData()">Import data</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(this)">
   </div>
 </div>
 
@@ -2672,7 +2677,10 @@
         <div class="brow">
           <div class="dst"><button class="db2" id="dsSub" onclick="setDS('sub')">SUB</button><button class="db2"
               id="dsDub" onclick="setDS('dub')">DUB</button></div>
+          <!-- Temporarily disabled - sources are down
           <div class="dst"><button class="db2" id="srcVideasy" onclick="setSrc('videasy')">Videasy</button><button class="db2" id="srcVidnest" onclick="setSrc('vidnest')">Vidnest</button><button class="db2" id="srcAnimepahe" onclick="setSrc('animepahe')">AnimePahe</button></div>
+          -->
+          <div class="dst"><button class="db2" id="srcAnimepahe" onclick="setSrc('animepahe')">AnimePahe</button></div>
           <button class="mkb" id="btnW" onclick="toggleMk('btnW')">✓ Watched</button>
           <button class="mkb" id="btnFollow" onclick="toggleFollow()">🔔 Follow</button>
           <button class="mkb" id="btnAutoNext" onclick="toggleAutoNext()" title="Auto Next Episode">⏭ Auto Next</button>
@@ -2689,6 +2697,10 @@
           episodes</div>
       </div>
     </div>
+  </div>
+  <div class="similar-section" id="seasonsSection" style="display:none">
+    <div class="sec-hd"><span class="sec-title">All Seasons</span></div>
+    <div class="grid" id="seasonsGrid"></div>
   </div>
   <div class="similar-section" id="similarSection" style="display:none">
     <div class="sec-hd"><span class="sec-title">Similar Anime</span></div>
@@ -2724,7 +2736,7 @@
 <div id="toast"></div>
 
 <footer class="footer">
-  Made by <a href="https://github.com/Thecosmiccat" target="_blank">Thecosmiccat>⩊<</a>  v2.6</footer>
+  Made by <a href="https://github.com/Thecosmiccat" target="_blank">Thecosmiccat>⩊<</a>  v2.7</footer>
   <!-- Ya i added a cat emoticon in the footer deal with it :P -->
 
     <script>
@@ -2929,10 +2941,53 @@
         toast('List exported!');
       }
 
+      function exportAllData() {
+        const data = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          data[key] = localStorage.getItem(key);
+        }
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'cat-ime-backup.json';
+        a.click();
+        toast('All data exported!');
+      }
+
+      function importAllData() {
+        document.getElementById('importFile').click();
+      }
+
+      function handleImport(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (!confirm('This will overwrite your current data. Continue?')) return;
+            
+            Object.keys(data).forEach(key => {
+              localStorage.setItem(key, data[key]);
+            });
+            
+            toast('Data imported successfully!');
+            location.reload();
+          } catch (err) {
+            toast('Invalid backup file');
+            console.error('Import error:', err);
+          }
+        };
+        reader.readAsText(file);
+        input.value = '';
+      }
+
       let curAnime = null;
       let curEp = 1;
       let curDS = localStorage.getItem('pref_ds') || 'sub';
-      let curSource = localStorage.getItem('pref_source') || 'videasy';
+      let curSource = localStorage.getItem('pref_source') || 'animepahe';
       let curGenre = '';
       let loggedIn = false;
 
@@ -3423,28 +3478,149 @@
         document.getElementById('epCountdown').style.display = 'none';
       }
 
+      function extractBaseTitle(title) {
+        // Remove season/part indicators to get base title
+        return title
+          .replace(/season\s*\d+/gi, '')
+          .replace(/(\d+)(st|nd|rd|th)\s*season/gi, '')
+          .replace(/part\s*\d+/gi, '')
+          .replace(/cour\s*\d+/gi, '')
+          .replace(/s\d+/gi, '')
+          .replace(/\s*:\s*.*$/, '') // Remove subtitle after colon
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
       async function fetchSeasons(id) {
-        const sel = document.getElementById('seasonSelect');
-        sel.style.display = 'none';
-        const q = `query($id: Int){ Media(id: $id) { title { english romaji } relations { edges { relationType node { id idMal title { romaji english } format episodes coverImage { large } isAdult } } } } }`;
+        if (!curAnime) {
+          console.log('No curAnime in fetchSeasons');
+          return;
+        }
+        
+        console.log('fetchSeasons called for:', curAnime.title);
+        
+        const seasonsSection = document.getElementById('seasonsSection');
+        const seasonsGrid = document.getElementById('seasonsGrid');
+        
+        // Show loading state
+        seasonsSection.style.display = 'block';
+        seasonsGrid.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text3);font-size:0.82rem">Loading seasons...</div>';
+        
+        let allSeasons = [];
+        
+        // Method 1: Use relations (any format, not just TV)
+        const q1 = `query($id: Int){ Media(id: $id) { title { english romaji } relations { edges { relationType node { id idMal title { romaji english } format episodes averageScore coverImage { large } isAdult } } } } }`;
         try {
-          const res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, variables: { id } }) });
-          const d = await res.json();
-          if (d.data) {
-            const rels = d.data.Media.relations.edges.filter(e => ['PREQUEL', 'SEQUEL', 'ALTERNATIVE'].includes(e.relationType) && e.node.format === 'TV' && !e.node.isAdult);
-            if (rels.length === 0) return;
-            const selfTitle = (d.data.Media.title.english || d.data.Media.title.romaji).replace(/'/g, "");
-            let html = `<option value="${curAnime.id}" selected>Season: ${selfTitle}</option>`;
+          const res1 = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q1, variables: { id } }) });
+          const d1 = await res1.json();
+          console.log('Relations data:', d1);
+          
+          if (d1.data) {
+            const rels = d1.data.Media.relations.edges.filter(e => !e.node.isAdult);
+            console.log('All relations (no format filter):', rels.length);
+            
             rels.forEach(r => {
-              const t = (r.node.title.english || r.node.title.romaji).replace(/'/g, "");
-              const eps = r.node.episodes || 12;
-              const img = r.node.coverImage.large;
-              html += `<option value='{"id":${r.node.id},"malId":${r.node.idMal || 'null'},"title":"${t.replace(/"/g, "&quot;")}","eps":${eps},"img":"${img}","dubbed":true,"score":"?"}'>${r.relationType}: ${t}</option>`;
+              allSeasons.push({
+                id: r.node.id,
+                malId: r.node.idMal,
+                title: r.node.title.english || r.node.title.romaji || 'Unknown',
+                eps: r.node.episodes || 12,
+                score: r.node.averageScore ? (r.node.averageScore / 10).toFixed(1) : '?',
+                img: r.node.coverImage.large || '',
+                relationType: r.relationType,
+                dubbed: true
+              });
             });
-            sel.innerHTML = html;
-            sel.style.display = 'inline-block';
+          } else {
+            console.log('No data in relations response');
           }
-        } catch (e) { }
+        } catch (e) {
+          console.error('Error fetching relations:', e);
+        }
+        
+        // Method 2: Search by title (very aggressive matching)
+        const baseTitle = extractBaseTitle(curAnime.title);
+        console.log('Base title for search:', baseTitle);
+        
+        const q2 = `query($search: String) { Page(page: 1, perPage: 50) { media(search: $search, type: ANIME, isAdult: false) { id idMal title { english romaji } episodes averageScore coverImage { large } } } }`;
+        try {
+          const res2 = await fetch('https://graphql.anilist.co', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ query: q2, variables: { search: baseTitle } }) 
+          });
+          const d2 = await res2.json();
+          console.log('Search results:', d2);
+          
+          if (d2.data && d2.data.Page.media.length > 0) {
+            d2.data.Page.media.forEach(m => {
+              const title = (m.title.english || m.title.romaji).toLowerCase();
+              const baseLower = baseTitle.toLowerCase();
+              
+              // Very loose matching - just check if base title is in the title
+              const isSeason = title.includes(baseLower) || baseLower.includes(title.split(/\s+/)[0]);
+              
+              if (isSeason && !allSeasons.find(s => s.id === m.id)) {
+                allSeasons.push({
+                  id: m.id,
+                  malId: m.idMal,
+                  title: m.title.english || m.title.romaji || 'Unknown',
+                  eps: m.episodes || 12,
+                  score: m.averageScore ? (m.averageScore / 10).toFixed(1) : '?',
+                  img: m.coverImage.large || '',
+                  relationType: 'SEARCH',
+                  dubbed: true
+                });
+              }
+            });
+          } else {
+            console.log('No data in search response');
+          }
+        } catch (e) {
+          console.error('Error searching:', e);
+        }
+        
+        // Remove duplicates and current anime
+        const uniqueSeasons = allSeasons.filter(s => s.id !== curAnime.id);
+        const seen = new Set();
+        const finalSeasons = [];
+        uniqueSeasons.forEach(s => {
+          if (!seen.has(s.id)) {
+            seen.add(s.id);
+            finalSeasons.push(s);
+          }
+        });
+        
+        console.log('Final seasons count:', finalSeasons.length);
+        console.log('Seasons data:', finalSeasons);
+        
+        if (finalSeasons.length === 0) {
+          console.log('No seasons found');
+          seasonsSection.style.display = 'none';
+          return;
+        }
+        
+        // Sort seasons by title
+        const sortedSeasons = finalSeasons.sort((a, b) => {
+          const titleA = a.title.toLowerCase();
+          const titleB = b.title.toLowerCase();
+          return titleA.localeCompare(titleB);
+        });
+        
+        // Render seasons as cards
+        seasonsGrid.innerHTML = '';
+        try {
+          sortedSeasons.forEach((season, idx) => {
+            const card = makeCard(season);
+            card.classList.add('fade-in');
+            card.style.animationDelay = `${Math.min(idx * 45, 360)}ms`;
+            seasonsGrid.appendChild(card);
+          });
+          console.log('Season cards rendered:', sortedSeasons.length);
+        } catch (e) {
+          console.error('Error rendering season cards:', e);
+          seasonsGrid.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text3);font-size:0.82rem">Error loading seasons</div>';
+        }
       }
 
       async function fetchSimilarAnime(id) {
@@ -3473,12 +3649,6 @@
             appendGrid('similarGrid', similar, true);
           }
         } catch (e) { }
-      }
-      // wtf is this spaghetti code for handling season switching? yes. yes it is. but it works so who cares :P
-
-      function switchSeason(val) {
-        if (val === String(curAnime.id)) return;
-        try { const a = JSON.parse(val); watchAnime(a); } catch (e) { }
       }
 
       function toggleFollow() {
@@ -3675,6 +3845,8 @@
         document.getElementById('watchMeta').textContent = `Episode ${idx} of ${total} · ${curDS.toUpperCase()}`;
 
         let url;
+        // Temporarily disabled - sources are down
+        /*
         if (curSource === 'animepahe') {
           url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
           // AnimePahe uses VidNest's animepahe endpoint
@@ -3684,8 +3856,11 @@
         } else {
           const accentHex = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim().replace('#', '');
           url = `https://player.videasy.net/anime/${malId}/${epNum}?color=${accentHex}`;
-        
         }
+        */
+        // Force animepahe for now
+        url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
+        
         document.getElementById('playerBox').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${epTitle}"></iframe>`;
         markWatched(malId, epNum);
 
@@ -3835,11 +4010,16 @@
       function setSrc(s) {
         curSource = s;
         localStorage.setItem('pref_source', s);
+        // Temporarily disabled - sources are down
+        /*
         document.getElementById('srcVideasy').classList.toggle('on', s === 'videasy');
         document.getElementById('srcVidnest').classList.toggle('on', s === 'vidnest');
         document.getElementById('srcAnimepahe').classList.toggle('on', s === 'animepahe');
         document.getElementById('spSrcVideasy').classList.toggle('on', s === 'videasy');
         document.getElementById('spSrcVidnest').classList.toggle('on', s === 'vidnest');
+        document.getElementById('spSrcAnimepahe').classList.toggle('on', s === 'animepahe');
+        */
+        document.getElementById('srcAnimepahe').classList.toggle('on', s === 'animepahe');
         document.getElementById('spSrcAnimepahe').classList.toggle('on', s === 'animepahe');
         if (curAnime) loadPlayer(curAnime.id, curEp, 'Episode ' + curEp, curEp, curAnime.eps);
       }
@@ -4306,8 +4486,12 @@
         initScifiScroll();
       }
 
+      // Temporarily disabled - sources are down
+      /*
       document.getElementById('srcVideasy').classList.toggle('on', curSource === 'videasy');
       document.getElementById('srcVidnest').classList.toggle('on', curSource === 'vidnest');
+      document.getElementById('srcAnimepahe').classList.toggle('on', curSource === 'animepahe');
+      */
       document.getElementById('srcAnimepahe').classList.toggle('on', curSource === 'animepahe');
       document.getElementById('dsSub').classList.toggle('on', curDS === 'sub');
       document.getElementById('dsDub').classList.toggle('on', curDS === 'dub');
@@ -4315,8 +4499,12 @@
       // sync settings panel toggles
       document.getElementById('spDsSub').classList.toggle('on', curDS === 'sub');
       document.getElementById('spDsDub').classList.toggle('on', curDS === 'dub');
+      // Temporarily disabled - sources are down
+      /*
       document.getElementById('spSrcVideasy').classList.toggle('on', curSource === 'videasy');
       document.getElementById('spSrcVidnest').classList.toggle('on', curSource === 'vidnest');
+      document.getElementById('spSrcAnimepahe').classList.toggle('on', curSource === 'animepahe');
+      */
       document.getElementById('spSrcAnimepahe').classList.toggle('on', curSource === 'animepahe');
       const spAN = document.getElementById('spAutoNext');
       spAN.classList.toggle('on', autoNext);
