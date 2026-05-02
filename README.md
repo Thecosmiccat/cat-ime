@@ -1,27 +1,74 @@
-# 🐾Cat-ime
+# 🐾 Cat-ime
 
-# WARNING: none of the sources are working so please wait untill they come back online as I have no control over this.
+Note: I have removed videasy and vidnest for now because they are down, animepahn is still up,
 
-A cat-themed anime streaming app — fully standalone, no backend, no build step. 
+A cat-themed anime streaming app — fully standalone, no backend, no build step.
 
-If you like this project, please consider giving this a star🌟!
+**Live Demo:** https://cat-ime.netlify.app
 
-Just go to: https://cat-ime.netlify.app or 
-https://thecosmiccat.github.io/cat-ime/
+If you like this project, please consider giving it a star ⭐!
+
+---
 
 ## Features
 
-- **Trending & Search** — pulls live data from the AniList GraphQL API including titles, episode counts, and banner artwork
-- **Dual Player Support** — stream via Videasy or Vidnest with persistent source preference
-- **Sub / Dub Toggle** — switch audio track per-session, preference saved across refreshes
-- **Auto Next Episode** — automatically advances to the next episode when one finishes
-- **Continue Watching** — resumes from where you left off using local storage
-- **My List** — track anime with Watching, Paused, and Dropped statuses
-- **Follow & Notifications** — follow shows and get notified when new episodes drop
+### 🎬 Streaming & Discovery
+- **Trending & Search** — Browse trending anime or search with filters (genre, year, status, score)
+- **Smart Recommendations** — Get personalized suggestions based on your continue watching history
+- **Category Browsing** — Quick access to Action, Romance, Fantasy, Comedy, and Sci-Fi sections
+- **Upcoming Calendar** — Track upcoming anime releases with schedule information
 
-## things used
+### 📺 Watching Experience
+- **Continue Watching** — Automatically resume from where you left off
+- **Episode Tracking** — Mark episodes as watched and track your progress
+- **Auto Next Episode** — Automatically advances to the next episode when one finishes
+- **Sub/Dub Toggle** — Switch audio tracks with preference saved across sessions
+- **Source Selection** — Choose your preferred streaming source
 
-- Vanilla HTML/CSS/JS — single file, zero dependencies
-- [AniList GraphQL API](https://anilist.gitbook.io/anilist-apiv2-docs/) for anime metadata
-- [Jikan API](https://jikan.moe/) for episode titles
-- [Videasy](https://videasy.net/) and [Vidnest](https://vidnest.fun/)(the other source is also from vidnest) for streaming
+### 📋 Personal Library
+- **My List** — Track anime with Watching, Paused, and Dropped statuses
+- **Progress Tracking** — See how many episodes you've watched for each series
+- **Data Persistence** — All data saved locally in your browser
+- **Export/Import** — Backup and restore your watch history and list
+
+### 🎨 Customization
+- **Multiple Themes** — 8 built-in color themes (Default, Midnight Rose, Amber Noir, Arctic, Sakura, Purple, Emerald, Slate)
+- **Custom Themes** — Create your own color schemes
+- **Responsive Design** — Works beautifully on desktop and mobile
+
+---
+
+## Tech Stack
+
+- **Vanilla HTML/CSS/JS** — Single file, zero dependencies, no build step
+- **AniList GraphQL API** — Live anime metadata, titles, and artwork
+- **Jikan API** — Episode titles and additional details
+- **Local Storage** — All user data persisted locally
+- **CSS Grid & Flexbox** — Modern, responsive layouts
+
+---
+
+## How to Use
+
+Go to: https://cat-ime.netlify.app or https://thecosmiccat.github.io/cat-ime/
+
+---
+
+## Development
+
+This is a single-file application. To modify:
+1. Edit `index.html`
+2. Open in browser to test changes
+3. No build process needed
+
+---
+
+## Notes
+
+- All streaming sources are third-party services. Availability may vary.
+- Data is stored locally in your browser — clearing browser data will reset your progress, but u can backup and transfer data using the export/import feature in the settings.
+- The app is fully client-side with no backend server.
+
+---
+
+Made with 🐾 by [Thecosmiccat](https://github.com/Thecosmiccat)
