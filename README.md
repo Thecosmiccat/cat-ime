@@ -6,7 +6,7 @@ A cat-themed anime streaming app — fully standalone, no backend, no build step
 
 If you like this project, please consider giving this a star🌟!
 
-Just go to: cat-ime.netlify.app or
+Just go to: https://cat-ime.netlify.app
 https://thecosmiccat.github.io/cat-ime/
 
 ## Features
