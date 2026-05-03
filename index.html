@@ -3848,53 +3848,27 @@
         let url;
         
         if (curSource === 'consumet') {
-          // Use Consumet API with gogoanime provider
+          // Use Consumet API via Netlify Function (avoids CORS)
           try {
             const animeTitle = curAnime ? curAnime.title : 'anime';
-            // Search for anime first to get consumet ID
-            const searchUrl = `https://api.consumet.org/anime/gogoanime/${encodeURIComponent(animeTitle)}`;
-            const searchRes = await fetch(searchUrl);
-            const searchData = await searchRes.json();
-            
-            console.log('Consumet search response:', searchData);
-            
-            if (searchData && searchData.results && searchData.results.length > 0) {
-              const animeId = searchData.results[0].id;
-              
-              // Get anime info to find episode ID
-              const infoUrl = `https://api.consumet.org/anime/gogoanime/info/${encodeURIComponent(animeId)}`;
-              const infoRes = await fetch(infoUrl);
-              const infoData = await infoRes.json();
-              
-              console.log('Consumet info response:', infoData);
-              
-              if (infoData && infoData.episodes && infoData.episodes.length > 0) {
-                const episodeId = infoData.episodes[Math.min(epNum - 1, infoData.episodes.length - 1)].id;
-                
-                // Get streaming links
-                const watchUrl = `https://api.consumet.org/anime/gogoanime/watch/${encodeURIComponent(episodeId)}`;
-                const watchRes = await fetch(watchUrl);
-                const watchData = await watchRes.json();
-                
-                console.log('Consumet watch response:', watchData);
-                
-                if (watchData && watchData.sources && watchData.sources.length > 0) {
-                  url = watchData.sources[0].url;
-                  console.log('Using Consumet gogoanime source:', url);
-                } else {
-                  console.warn('Consumet no sources found, falling back to animepahe');
-                  url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
-                }
-              } else {
-                console.warn('Consumet no episodes found, falling back to animepahe');
-                url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
-              }
+            const res = await fetch('/.netlify/functions/consumet', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ animeTitle, epNum })
+            });
+            const data = await res.json();
+
+            console.log('Consumet function response:', data);
+
+            if (data && data.sources && data.sources.length > 0) {
+              url = data.sources[0].url;
+              console.log('Using Consumet source:', url);
             } else {
-              console.warn('Consumet search failed, falling back to animepahe');
+              console.warn('Consumet no sources, falling back to animepahe');
               url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
             }
           } catch (e) {
-            console.error('Consumet API error:', e);
+            console.error('Consumet function error:', e);
             url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
           }
         } else {
@@ -3921,11 +3895,11 @@
       // Waifu.pics API integration for random anime images
       async function getRandomWaifuImage() {
         try {
-          const res = await fetch('https://api.waifu.pics/sfw/waifu');
+          const res = await fetch('/.netlify/functions/waifu');
           const data = await res.json();
           return data.url;
         } catch (e) {
-          console.error('Waifu.pics API error:', e);
+          console.error('Waifu function error:', e);
           return null;
         }
       }
