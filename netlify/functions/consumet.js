@@ -1,3 +1,14 @@
+// Helper to safely parse JSON
+async function safeJson(res, label) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error(`${label} - Not JSON:`, text.substring(0, 200));
+    return { error: 'Invalid JSON response', raw: text.substring(0, 200) };
+  }
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -22,71 +33,39 @@ exports.handler = async (event) => {
       };
     }
 
+    // Try 9anime provider (more stable than gogoanime)
     // Step 1: Search for anime
-    const searchUrl = `https://api.consumet.org/anime/gogoanime/${encodeURIComponent(animeTitle)}`;
+    const searchUrl = `https://api.consumet.org/anime/9anime/${encodeURIComponent(animeTitle)}`;
     const searchRes = await fetch(searchUrl);
-    const searchData = await searchRes.json();
+    const searchData = await safeJson(searchRes, 'search');
 
-    // Debug: log what we got
-    console.log('Search results:', searchData.results?.length || 0, 'for', animeTitle);
+    console.log('9anime search:', searchData.results?.length || 0, 'results for', animeTitle);
 
     if (!searchData.results || searchData.results.length === 0) {
-      return {
-        statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ 
-          debug: { step: 'search', animeTitle, searchData },
-          error: 'Anime not found on gogoanime' 
-        })
-      };
+      // Try animeunity as fallback
+      console.log('Trying animeunity...');
+      const unitySearchUrl = `https://api.consumet.org/anime/animeunity/${encodeURIComponent(animeTitle)}`;
+      const unityRes = await fetch(unitySearchUrl);
+      const unityData = await safeJson(unityRes, 'unity-search');
+      
+      if (!unityData.results || unityData.results.length === 0) {
+        return {
+          statusCode: 200,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ 
+            debug: { step: 'search', animeTitle, searchData, unityData },
+            error: 'Anime not found on any provider' 
+          })
+        };
+      }
+      
+      // Use animeunity
+      return await getAnimeUnityStreams(unityData.results[0].id, epNum, animeTitle);
     }
 
-    // Step 2: Get anime info
-    const animeId = searchData.results[0].id;
-    const infoUrl = `https://api.consumet.org/anime/gogoanime/info/${encodeURIComponent(animeId)}`;
-    const infoRes = await fetch(infoUrl);
-    const infoData = await infoRes.json();
-
-    console.log('Episodes found:', infoData.episodes?.length || 0);
-
-    if (!infoData.episodes || infoData.episodes.length === 0) {
-      return {
-        statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ 
-          debug: { step: 'info', animeId, infoData },
-          error: 'No episodes found' 
-        })
-      };
-    }
-
-    // Step 3: Get streaming links
-    const episodeIndex = Math.min(epNum - 1, infoData.episodes.length - 1);
-    const episodeId = infoData.episodes[episodeIndex].id;
-    const watchUrl = `https://api.consumet.org/anime/gogoanime/watch/${encodeURIComponent(episodeId)}`;
-    const watchRes = await fetch(watchUrl);
-    const watchData = await watchRes.json();
-
-    console.log('Watch data:', watchData);
-
-    // Return with debug info
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        ...watchData,
-        debug: {
-          animeTitle,
-          epNum,
-          foundAnime: searchData.results[0].title,
-          totalEpisodes: infoData.episodes.length,
-          episodeId
-        }
-      })
-    };
+    // Use 9anime
+    return await get9animeStreams(searchData.results[0].id, epNum, animeTitle);
+    
   } catch (e) {
     console.error('Function error:', e);
     return {
@@ -96,3 +75,99 @@ exports.handler = async (event) => {
     };
   }
 };
+
+async function get9animeStreams(animeId, epNum, animeTitle) {
+  // Step 2: Get anime info
+  const infoUrl = `https://api.consumet.org/anime/9anime/info/${encodeURIComponent(animeId)}`;
+  const infoRes = await fetch(infoUrl);
+  const infoData = await safeJson(infoRes, '9anime-info');
+
+  console.log('9anime episodes:', infoData.episodes?.length || 0);
+
+  if (!infoData.episodes || infoData.episodes.length === 0) {
+    return {
+      statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ 
+        debug: { step: 'info', animeId, infoData },
+        error: 'No episodes found on 9anime' 
+      })
+    };
+  }
+
+  // Step 3: Get streaming links
+  const episodeIndex = Math.min(epNum - 1, infoData.episodes.length - 1);
+  const episodeId = infoData.episodes[episodeIndex].id;
+  const watchUrl = `https://api.consumet.org/anime/9anime/watch/${encodeURIComponent(episodeId)}`;
+  const watchRes = await fetch(watchUrl);
+  const watchData = await safeJson(watchRes, '9anime-watch');
+
+  console.log('9anime watch data:', watchData.sources?.length || 0, 'sources');
+
+  return {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      ...watchData,
+      debug: {
+        provider: '9anime',
+        animeTitle,
+        epNum,
+        foundAnime: infoData.title,
+        totalEpisodes: infoData.episodes.length,
+        episodeId
+      }
+    })
+  };
+}
+
+async function getAnimeUnityStreams(animeId, epNum, animeTitle) {
+  // Get anime info from animeunity
+  const infoUrl = `https://api.consumet.org/anime/animeunity/info/${encodeURIComponent(animeId)}`;
+  const infoRes = await fetch(infoUrl);
+  const infoData = await safeJson(infoRes, 'unity-info');
+
+  console.log('animeunity episodes:', infoData.episodes?.length || 0);
+
+  if (!infoData.episodes || infoData.episodes.length === 0) {
+    return {
+      statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ 
+        debug: { step: 'info', animeId, infoData },
+        error: 'No episodes found on animeunity' 
+      })
+    };
+  }
+
+  // Get streaming links
+  const episodeIndex = Math.min(epNum - 1, infoData.episodes.length - 1);
+  const episodeId = infoData.episodes[episodeIndex].id;
+  const watchUrl = `https://api.consumet.org/anime/animeunity/watch/${encodeURIComponent(episodeId)}`;
+  const watchRes = await fetch(watchUrl);
+  const watchData = await safeJson(watchRes, 'unity-watch');
+
+  console.log('animeunity watch data:', watchData.sources?.length || 0, 'sources');
+
+  return {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      ...watchData,
+      debug: {
+        provider: 'animeunity',
+        animeTitle,
+        epNum,
+        foundAnime: infoData.title,
+        totalEpisodes: infoData.episodes.length,
+        episodeId
+      }
+    })
+  };
+}
