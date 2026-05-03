@@ -3859,12 +3859,18 @@
             const data = await res.json();
 
             console.log('Consumet function response:', data);
+            
+            // Show debug info
+            if (data.debug) {
+              console.log('Debug info:', data.debug);
+              toast(`Consumet: ${data.error || 'Found ' + data.debug.foundAnime}`);
+            }
 
             if (data && data.sources && data.sources.length > 0) {
               url = data.sources[0].url;
               console.log('Using Consumet source:', url);
             } else {
-              console.warn('Consumet no sources, falling back to animepahe');
+              console.warn('Consumet no sources, falling back to animepahe. Error:', data.error);
               url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
             }
           } catch (e) {

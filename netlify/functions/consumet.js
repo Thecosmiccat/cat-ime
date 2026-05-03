@@ -27,11 +27,17 @@ exports.handler = async (event) => {
     const searchRes = await fetch(searchUrl);
     const searchData = await searchRes.json();
 
+    // Debug: log what we got
+    console.log('Search results:', searchData.results?.length || 0, 'for', animeTitle);
+
     if (!searchData.results || searchData.results.length === 0) {
       return {
-        statusCode: 404,
+        statusCode: 200,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: 'Anime not found' })
+        body: JSON.stringify({ 
+          debug: { step: 'search', animeTitle, searchData },
+          error: 'Anime not found on gogoanime' 
+        })
       };
     }
 
@@ -41,11 +47,16 @@ exports.handler = async (event) => {
     const infoRes = await fetch(infoUrl);
     const infoData = await infoRes.json();
 
+    console.log('Episodes found:', infoData.episodes?.length || 0);
+
     if (!infoData.episodes || infoData.episodes.length === 0) {
       return {
-        statusCode: 404,
+        statusCode: 200,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: 'No episodes found' })
+        body: JSON.stringify({ 
+          debug: { step: 'info', animeId, infoData },
+          error: 'No episodes found' 
+        })
       };
     }
 
@@ -56,19 +67,32 @@ exports.handler = async (event) => {
     const watchRes = await fetch(watchUrl);
     const watchData = await watchRes.json();
 
+    console.log('Watch data:', watchData);
+
+    // Return with debug info
     return {
       statusCode: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(watchData)
+      body: JSON.stringify({
+        ...watchData,
+        debug: {
+          animeTitle,
+          epNum,
+          foundAnime: searchData.results[0].title,
+          totalEpisodes: infoData.episodes.length,
+          episodeId
+        }
+      })
     };
   } catch (e) {
+    console.error('Function error:', e);
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: e.message })
+      body: JSON.stringify({ error: e.message, stack: e.stack })
     };
   }
 };
