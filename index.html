@@ -2375,7 +2375,6 @@
       <button class="db2" id="spSrcVidnest" onclick="setSrc('vidnest')">Vidnest</button>
       -->
       <button class="db2" id="spSrcAnimepahe" onclick="setSrc('animepahe')">AnimePahe</button>
-      <button class="db2" id="spSrcConsumet" onclick="setSrc('consumet')">Consumet</button>
     </div>
   </div>
   <div class="sp-row">
@@ -2681,7 +2680,7 @@
           <!-- Temporarily disabled - sources are down
           <div class="dst"><button class="db2" id="srcVideasy" onclick="setSrc('videasy')">Videasy</button><button class="db2" id="srcVidnest" onclick="setSrc('vidnest')">Vidnest</button><button class="db2" id="srcAnimepahe" onclick="setSrc('animepahe')">AnimePahe</button></div>
           -->
-          <div class="dst"><button class="db2" id="srcAnimepahe" onclick="setSrc('animepahe')">AnimePahe</button><button class="db2" id="srcConsumet" onclick="setSrc('consumet')">Consumet</button></div>
+          <div class="dst"><button class="db2" id="srcAnimepahe" onclick="setSrc('animepahe')">AnimePahe</button></div>
           <button class="mkb" id="btnW" onclick="toggleMk('btnW')">✓ Watched</button>
           <button class="mkb" id="btnFollow" onclick="toggleFollow()">🔔 Follow</button>
           <button class="mkb" id="btnAutoNext" onclick="toggleAutoNext()" title="Auto Next Episode">⏭ Auto Next</button>
@@ -2737,7 +2736,7 @@
 <div id="toast"></div>
 
 <footer class="footer">
-  Made by <a href="https://github.com/Thecosmiccat" target="_blank">Thecosmiccat>⩊<</a>  v2.9</footer>
+  Made by <a href="https://github.com/Thecosmiccat" target="_blank">Thecosmiccat>⩊<</a>  v2.8</footer>
   <!-- Ya i added a cat emoticon in the footer deal with it :P -->
 
     <script>
@@ -3840,47 +3839,27 @@
         if (isEnded) goNextEpisode();
       });
 
-      async function loadPlayer(malId, epNum, epTitle, idx, total) {
+      function loadPlayer(malId, epNum, epTitle, idx, total) {
         curEp = epNum;
         document.getElementById('watchTitle').textContent = curAnime ? curAnime.title : 'Anime';
         document.getElementById('watchMeta').textContent = `Episode ${idx} of ${total} · ${curDS.toUpperCase()}`;
 
         let url;
-        
-        if (curSource === 'consumet') {
-          // Use Consumet API via Netlify Function (avoids CORS)
-          try {
-            const animeTitle = curAnime ? curAnime.title : 'anime';
-            const res = await fetch('/.netlify/functions/consumet', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ animeTitle, epNum })
-            });
-            const data = await res.json();
-
-            console.log('Consumet function response:', data);
-            
-            // Show debug info
-            if (data.debug) {
-              console.log('Debug info:', data.debug);
-              toast(`Consumet: ${data.error || 'Found ' + data.debug.foundAnime}`);
-            }
-
-            if (data && data.sources && data.sources.length > 0) {
-              url = data.sources[0].url;
-              console.log('Using Consumet source:', url);
-            } else {
-              console.warn('Consumet no sources, falling back to animepahe. Error:', data.error);
-              url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
-            }
-          } catch (e) {
-            console.error('Consumet function error:', e);
-            url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
-          }
-        } else {
-          // Use animepahe (default)
+        // Temporarily disabled - sources are down
+        /*
+        if (curSource === 'animepahe') {
           url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
+          // AnimePahe uses VidNest's animepahe endpoint
+        } else if (curSource === 'vidnest') {
+          url = `https://vidnest.fun/anime/${malId}/${epNum}/${curDS}`;
+          // Vidnest doesn't support color theming like Videasy, so we'll just have to deal with their default player UI :(
+        } else {
+          const accentHex = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim().replace('#', '');
+          url = `https://player.videasy.net/anime/${malId}/${epNum}?color=${accentHex}`;
         }
+        */
+        // Force animepahe for now
+        url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
         
         document.getElementById('playerBox').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${epTitle}"></iframe>`;
         markWatched(malId, epNum);
@@ -3897,43 +3876,6 @@
       // Thank you Videasy for providing the anime streaming API for free, you're the real MVP <3
       // NVM FUCK YOU VIDEASY, U JUST GET CANSER THE SEC I CHENGE THE UI
       // welcome vidnest so if videasy is fucking around u will save us
-
-      // Waifu.pics API integration for random anime images
-      async function getRandomWaifuImage() {
-        try {
-          const res = await fetch('/.netlify/functions/waifu');
-          const data = await res.json();
-          return data.url;
-        } catch (e) {
-          console.error('Waifu function error:', e);
-          return null;
-        }
-      }
-
-      async function loadRandomHeroImages() {
-        const heroSlider = document.getElementById('heroSlider');
-        if (!heroSlider) return;
-
-        // Fetch 5 random anime images from Waifu.pics
-        const imagePromises = [];
-        for (let i = 0; i < 5; i++) {
-          imagePromises.push(getRandomWaifuImage());
-        }
-
-        const images = await Promise.all(imagePromises);
-        const validImages = images.filter(img => img !== null);
-
-        if (validImages.length > 0) {
-          // Use Waifu.pics images as hero backgrounds
-          heroSlider.innerHTML = '';
-          validImages.forEach((imgUrl, i) => {
-            const div = document.createElement('div');
-            div.className = 'hero-slide' + (i === 0 ? ' active' : '');
-            div.style.backgroundImage = `url(${imgUrl})`;
-            heroSlider.appendChild(div);
-          });
-        }
-      }
 
       function markWatched(id, ep) {
         ep = Number(ep);
@@ -4068,8 +4010,6 @@
       function setSrc(s) {
         curSource = s;
         localStorage.setItem('pref_source', s);
-        console.log('Source switched to:', s);
-        toast(`Source: ${s === 'consumet' ? 'Consumet' : 'AnimePahe'}`);
         // Temporarily disabled - sources are down
         /*
         document.getElementById('srcVideasy').classList.toggle('on', s === 'videasy');
@@ -4080,9 +4020,7 @@
         document.getElementById('spSrcAnimepahe').classList.toggle('on', s === 'animepahe');
         */
         document.getElementById('srcAnimepahe').classList.toggle('on', s === 'animepahe');
-        document.getElementById('srcConsumet').classList.toggle('on', s === 'consumet');
         document.getElementById('spSrcAnimepahe').classList.toggle('on', s === 'animepahe');
-        document.getElementById('spSrcConsumet').classList.toggle('on', s === 'consumet');
         if (curAnime) loadPlayer(curAnime.id, curEp, 'Episode ' + curEp, curEp, curAnime.eps);
       }
 
@@ -4555,7 +4493,6 @@
       document.getElementById('srcAnimepahe').classList.toggle('on', curSource === 'animepahe');
       */
       document.getElementById('srcAnimepahe').classList.toggle('on', curSource === 'animepahe');
-      document.getElementById('srcConsumet').classList.toggle('on', curSource === 'consumet');
       document.getElementById('dsSub').classList.toggle('on', curDS === 'sub');
       document.getElementById('dsDub').classList.toggle('on', curDS === 'dub');
       document.getElementById('btnAutoNext').classList.toggle('on', autoNext);
@@ -4569,7 +4506,6 @@
       document.getElementById('spSrcAnimepahe').classList.toggle('on', curSource === 'animepahe');
       */
       document.getElementById('spSrcAnimepahe').classList.toggle('on', curSource === 'animepahe');
-      document.getElementById('spSrcConsumet').classList.toggle('on', curSource === 'consumet');
       const spAN = document.getElementById('spAutoNext');
       spAN.classList.toggle('on', autoNext);
       spAN.textContent = autoNext ? 'On' : 'Off';
@@ -4592,9 +4528,6 @@
       loadFantasy();
       loadComedy();
       loadScifi();
-
-      // Load random hero images from Waifu.pics
-      loadRandomHeroImages();
 
       // Hero floating particles
       (function() {
