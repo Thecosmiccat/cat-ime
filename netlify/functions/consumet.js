@@ -34,17 +34,30 @@ exports.handler = async (event) => {
     }
 
     // Try 9anime provider (more stable than gogoanime)
+    // Simplify title - remove subtitle after colon for better search
+    const simpleTitle = animeTitle.split(':')[0].trim();
+    
     // Step 1: Search for anime
-    const searchUrl = `https://api.consumet.org/anime/9anime/${encodeURIComponent(animeTitle)}`;
+    const searchUrl = `https://api.consumet.org/anime/9anime/${encodeURIComponent(simpleTitle)}`;
     const searchRes = await fetch(searchUrl);
     const searchData = await safeJson(searchRes, 'search');
 
-    console.log('9anime search:', searchData.results?.length || 0, 'results for', animeTitle);
+    console.log('9anime search:', searchData.results?.length || 0, 'results for', simpleTitle);
 
     if (!searchData.results || searchData.results.length === 0) {
-      // Try animeunity as fallback
+      // Try full title as fallback
+      console.log('Trying full title...');
+      const fullSearchUrl = `https://api.consumet.org/anime/9anime/${encodeURIComponent(animeTitle)}`;
+      const fullRes = await fetch(fullSearchUrl);
+      const fullData = await safeJson(fullRes, 'search-full');
+      
+      if (fullData.results && fullData.results.length > 0) {
+        return await get9animeStreams(fullData.results[0].id, epNum, animeTitle);
+      }
+      
+      // Try animeunity as final fallback
       console.log('Trying animeunity...');
-      const unitySearchUrl = `https://api.consumet.org/anime/animeunity/${encodeURIComponent(animeTitle)}`;
+      const unitySearchUrl = `https://api.consumet.org/anime/animeunity/${encodeURIComponent(simpleTitle)}`;
       const unityRes = await fetch(unitySearchUrl);
       const unityData = await safeJson(unityRes, 'unity-search');
       
@@ -53,7 +66,13 @@ exports.handler = async (event) => {
           statusCode: 200,
           headers: { 'Access-Control-Allow-Origin': '*' },
           body: JSON.stringify({ 
-            debug: { step: 'search', animeTitle, searchData, unityData },
+            debug: { 
+              step: 'search', 
+              originalTitle: animeTitle,
+              simpleTitle,
+              nineAnimeResults: searchData.results?.length || 0,
+              unityResults: unityData.results?.length || 0
+            },
             error: 'Anime not found on any provider' 
           })
         };
