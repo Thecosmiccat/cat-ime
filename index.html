@@ -2604,7 +2604,7 @@
         <!-- Auth buttons -->
         <div id="authButtons" class="auth-buttons">
           <button class="auth-nav-btn" onclick="showAccountModal()">Sign In</button>
-          <button class="auth-nav-btn primary" onclick="showSignupForm()">Sign Up</button>
+          <button class="auth-nav-btn primary" onclick="showAccountModal(); setTimeout(showSignupForm, 100)">Sign Up</button>
         </div>
         
         <!-- User info (shown when logged in) -->
