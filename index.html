@@ -36,6 +36,24 @@
     if (modal) modal.style.display = 'none';
   };
   
+  window.showLoginFormModal = function() {
+    const modal = document.getElementById('accountModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.getElementById('authForm').classList.remove('hidden');
+      document.getElementById('signupForm').classList.add('hidden');
+    }
+  };
+  
+  window.showSignupFormModal = function() {
+    const modal = document.getElementById('accountModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.getElementById('authForm').classList.add('hidden');
+      document.getElementById('signupForm').classList.remove('hidden');
+    }
+  };
+  
   window.showSignupForm = function() {
     document.getElementById('authForm').classList.add('hidden');
     document.getElementById('signupForm').classList.remove('hidden');
@@ -73,7 +91,7 @@
         currentUser = data.user;
         toast('Welcome back!');
         hideAccountModal();
-        updateAuthUI();
+        await updateAuthUI();
       }
     } catch (err) {
       console.error('Sign in error:', err);
@@ -82,10 +100,11 @@
   };
   
   window.signUpWithEmail = async function() {
+    const username = document.getElementById('signupUsername').value.trim();
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
     
-    if (!email || !password) {
+    if (!username || !email || !password) {
       toast('Please fill in all fields');
       return;
     }
@@ -100,10 +119,20 @@
       return;
     }
     
+    if (username.length < 3) {
+      toast('Username must be at least 3 characters');
+      return;
+    }
+    
     try {
       const { data, error } = await supabaseClient.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          data: {
+            username: username
+          }
+        }
       });
       
       if (error) {
@@ -141,14 +170,321 @@
       await supabaseClient.auth.signOut();
       currentUser = null;
       toast('Signed out');
-      updateAuthUI();
+      await updateAuthUI();
+      hideAccountSettings();
     } catch (err) {
       console.error('Sign out error:', err);
       toast('An error occurred signing out');
     }
   };
   
-  window.updateAuthUI = function() {
+  // Account Settings Functions
+  window.showAccountSettings = async function() {
+    const modal = document.getElementById('accountSettingsModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      
+      // Populate user data
+      if (currentUser) {
+        // Fetch profile data from Supabase
+        const { data: profile, error } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching profile:', error);
+        }
+        
+        const username = profile?.username || currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || 'User';
+        const bio = profile?.bio || '';
+        const avatarUrl = profile?.avatar_url || currentUser.user_metadata?.avatar_url;
+        const initial = username.charAt(0).toUpperCase();
+        
+        document.getElementById('settingsUsername').value = username;
+        document.getElementById('settingsEmail').value = currentUser.email || '';
+        document.getElementById('settingsBio').value = bio;
+        
+        // Set avatar display
+        const avatarImg = document.getElementById('settingsAvatarImg');
+        const avatarInitial = document.getElementById('settingsAvatarInitial');
+        
+        if (avatarUrl) {
+          avatarImg.src = avatarUrl;
+          avatarImg.style.display = 'block';
+          avatarInitial.style.display = 'none';
+        } else {
+          avatarImg.style.display = 'none';
+          avatarInitial.style.display = 'block';
+          avatarInitial.textContent = initial;
+        }
+      }
+    }
+  };
+  
+  window.hideAccountSettings = function() {
+    const modal = document.getElementById('accountSettingsModal');
+    if (modal) modal.style.display = 'none';
+  };
+  
+  window.saveProfileSettings = async function() {
+    const username = document.getElementById('settingsUsername').value.trim();
+    const bio = document.getElementById('settingsBio').value.trim();
+    
+    if (!username || username.length < 3) {
+      toast('Username must be at least 3 characters');
+      return;
+    }
+    
+    if (bio.length > 150) {
+      toast('Bio must be 150 characters or less');
+      return;
+    }
+    
+    try {
+      // Update user metadata
+      const { data: userData, error: userError } = await supabaseClient.auth.updateUser({
+        data: {
+          username: username,
+          bio: bio
+        }
+      });
+      
+      if (userError) {
+        toast(userError.message);
+        return;
+      }
+      
+      // Update profiles table
+      const { error: profileError } = await supabaseClient
+        .from('profiles')
+        .upsert({
+          id: currentUser.id,
+          username: username,
+          bio: bio,
+          updated_at: new Date().toISOString()
+        });
+      
+      if (profileError) {
+        console.error('Profile table update error:', profileError);
+        toast('Error saving to profile table');
+        return;
+      }
+      
+      currentUser = userData.user;
+      toast('Profile updated!');
+      await updateAuthUI();
+    } catch (err) {
+      console.error('Profile update error:', err);
+      toast('An error occurred updating profile');
+    }
+  };
+  
+  window.uploadAvatar = async function(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast('Please select an image file');
+      return;
+    }
+    
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast('Image must be less than 2MB');
+      return;
+    }
+    
+    try {
+      toast('Uploading avatar...');
+      
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${currentUser.id}/avatar.${fileExt}`;
+      
+      const { error: uploadError } = await supabaseClient
+        .storage
+        .from('avatars')
+        .upload(filePath, file, {
+          upsert: true
+        });
+      
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast('Error uploading avatar');
+        return;
+      }
+      
+      // Get public URL
+      const { data: { publicUrl } } = supabaseClient
+        .storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+      
+      // Update profiles table with avatar URL
+      const { error: updateError } = await supabaseClient
+        .from('profiles')
+        .upsert({
+          id: currentUser.id,
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString()
+        });
+      
+      if (updateError) {
+        console.error('Profile update error:', updateError);
+        toast('Error saving avatar URL');
+        return;
+      }
+      
+      // Update UI
+      const avatarImg = document.getElementById('settingsAvatarImg');
+      const avatarInitial = document.getElementById('settingsAvatarInitial');
+      
+      avatarImg.src = publicUrl;
+      avatarImg.style.display = 'block';
+      avatarInitial.style.display = 'none';
+      
+      // Also update nav bar avatar
+      await updateAuthUI();
+      
+      toast('Avatar updated!');
+    } catch (err) {
+      console.error('Avatar upload error:', err);
+      toast('An error occurred uploading avatar');
+    }
+  };
+  
+  window.changePassword = async function() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast('Please fill in all password fields');
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      toast('New password must be at least 6 characters');
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      toast('Passwords do not match');
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabaseClient.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) {
+        toast(error.message);
+      } else {
+        toast('Password changed successfully!');
+        // Clear password fields
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+      }
+    } catch (err) {
+      console.error('Password change error:', err);
+      toast('An error occurred changing password');
+    }
+  };
+  
+  window.syncSettings = async function() {
+    // This will sync localStorage data to Supabase
+    if (!currentUser) {
+      toast('You must be signed in to sync settings');
+      return;
+    }
+    
+    try {
+      // Limit data size to avoid metadata limits (16KB max)
+      // Only sync last 20 items from each list to stay under limit
+      const continueWatching = JSON.parse(localStorage.getItem('continueWatching') || '[]').slice(0, 20);
+      const history = JSON.parse(localStorage.getItem('history') || '[]').slice(0, 20);
+      const list = JSON.parse(localStorage.getItem('list') || '[]').slice(0, 20);
+      
+      const userData = {
+        continueWatching,
+        history,
+        list,
+        theme: localStorage.getItem('theme') || '0',
+        defaultAudio: localStorage.getItem('defaultAudio') || 'sub',
+        defaultSource: localStorage.getItem('defaultSource') || 'animepahe'
+      };
+      
+      // Check data size before sending
+      const dataSize = JSON.stringify(userData).length;
+      if (dataSize > 10000) {
+        toast('Data too large to sync. Please clear some watch history.');
+        return;
+      }
+      
+      // Store in user metadata (for now - ideally use a separate table)
+      const { data, error } = await supabaseClient.auth.updateUser({
+        data: {
+          ...currentUser.user_metadata,
+          appData: userData
+        }
+      });
+      
+      if (error) {
+        toast(error.message);
+      } else {
+        toast('Settings synced successfully!');
+        currentUser = data.user;
+      }
+    } catch (err) {
+      console.error('Sync error:', err);
+      toast('An error occurred syncing settings');
+    }
+  };
+  
+  window.deleteAccount = async function() {
+    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      return;
+    }
+    
+    const confirmation = prompt('Type "DELETE" to confirm account deletion:');
+    if (confirmation !== 'DELETE') {
+      toast('Account deletion cancelled');
+      return;
+    }
+    
+    try {
+      // Delete user's profile data first
+      const { error: profileError } = await supabaseClient
+        .from('profiles')
+        .delete()
+        .eq('id', currentUser.id);
+      
+      if (profileError) {
+        console.error('Profile deletion error:', profileError);
+      }
+      
+      // Note: User account deletion requires admin privileges
+      // This must be done via a serverless function or manually in Supabase Dashboard
+      // For now, we just clear the session client-side
+      await supabaseClient.auth.signOut();
+      currentUser = null;
+      localStorage.clear();
+      toast('Account data cleared. Please contact admin for complete deletion.');
+      await updateAuthUI();
+      hideAccountSettings();
+    } catch (err) {
+      console.error('Delete account error:', err);
+      toast('An error occurred. Please contact support.');
+    }
+  };
+  
+  window.updateAuthUI = async function() {
     const authButtons = document.getElementById('authButtons');
     const userInfo = document.getElementById('userInfo');
     
@@ -157,7 +493,27 @@
     if (currentUser) {
       authButtons.classList.add('hidden');
       userInfo.classList.remove('hidden');
-      document.getElementById('userEmail').textContent = currentUser.email;
+      
+      // Fetch profile data to get avatar
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('username, avatar_url')
+        .eq('id', currentUser.id)
+        .single();
+      
+      const username = profile?.username || currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || 'User';
+      const avatarUrl = profile?.avatar_url;
+      const initial = username.charAt(0).toUpperCase();
+      
+      document.getElementById('userName').textContent = username;
+      
+      // Update avatar display
+      const userAvatar = document.getElementById('userAvatar');
+      if (avatarUrl) {
+        userAvatar.innerHTML = `<img src="${avatarUrl}" alt="${username}" style="width: 100%; height: 100%; object-fit: cover;">`;
+      } else {
+        userAvatar.innerHTML = `<span id="userInitial">${initial}</span>`;
+      }
     } else {
       authButtons.classList.remove('hidden');
       userInfo.classList.add('hidden');
@@ -191,32 +547,87 @@
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session?.user) {
         currentUser = session.user;
+        
+        // Ensure Google OAuth users have a profile
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('username')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (!profile?.username) {
+          const defaultUsername = session.user.email?.split('@')[0] || 'user';
+          const timestamp = Date.now().toString().slice(-4);
+          const username = `${defaultUsername}_${timestamp}`;
+          
+          await supabaseClient
+            .from('profiles')
+            .upsert({
+              id: session.user.id,
+              username: username,
+              updated_at: new Date().toISOString()
+            });
+          
+          await supabaseClient.auth.updateUser({
+            data: { username: username }
+          });
+        }
+        
         toast('Welcome back!');
         hideAccountModal();
-        updateAuthUI();
+        await updateAuthUI();
       }
     }
   }
   
   // Listen for auth changes
-  supabaseClient.auth.onAuthStateChange((event, session) => {
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
     console.log('Auth state changed:', event, session?.user?.email);
     currentUser = session?.user || null;
-    updateAuthUI();
     
+    // Handle new sign-ins (especially Google OAuth users)
     if (event === 'SIGNED_IN' && session?.user) {
+      // Check if user has a profile
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('username')
+        .eq('id', session.user.id)
+        .single();
+      
+      // If no profile or no username, create default
+      if (!profile?.username) {
+        const defaultUsername = session.user.email?.split('@')[0] || 'user';
+        const timestamp = Date.now().toString().slice(-4);
+        const username = `${defaultUsername}_${timestamp}`;
+        
+        await supabaseClient
+          .from('profiles')
+          .upsert({
+            id: session.user.id,
+            username: username,
+            updated_at: new Date().toISOString()
+          });
+        
+        // Update user metadata
+        await supabaseClient.auth.updateUser({
+          data: { username: username }
+        });
+      }
+      
       toast(`Welcome, ${session.user.email}!`);
       hideAccountModal();
     } else if (event === 'SIGNED_OUT') {
       toast('Signed out');
     }
+    
+    await updateAuthUI();
   });
   
   // Initialize on page load
   document.addEventListener('DOMContentLoaded', async () => {
     await handleAuthCallback();
     await checkAuthState();
-    updateAuthUI();
+    await updateAuthUI();
   });
 </script>
 <style>
@@ -2687,6 +3098,130 @@
     display: none !important;
   }
 
+  /* Settings Modal Styles */
+  .settings-modal {
+    max-width: 500px;
+  }
+
+  .settings-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .settings-section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .settings-desc {
+    color: var(--text2);
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .profile-section {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .profile-avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 32px;
+    color: white;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .profile-avatar-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .profile-field {
+    margin-bottom: 12px;
+  }
+
+  .profile-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 4px;
+  }
+
+  .profile-field textarea {
+    resize: none;
+    min-height: 60px;
+  }
+
+  .avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .profile-avatar-large:hover .avatar-overlay {
+    opacity: 1;
+  }
+
+  .avatar-overlay svg {
+    color: white;
+  }
+
+  .auth-btn.danger {
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+  }
+
+  .auth-btn.danger:hover {
+    background: #ef4444;
+    color: white;
+  }
+
+  .settings-section.danger {
+    padding-top: 16px;
+  }
+
+  .settings-section.danger h3 {
+    color: #ef4444;
+  }
+
   /* Navigation Auth Buttons */
   .auth-buttons {
     display: flex;
@@ -2725,12 +3260,41 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
   }
 
-  .user-email {
-    color: var(--text2);
+  .user-info:hover {
+    background: var(--bg3);
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
     font-size: 14px;
-    max-width: 150px;
+    color: white;
+    overflow: hidden;
+  }
+
+  .user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .user-name {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2740,6 +3304,7 @@
   @media (max-width: 768px) {
     .modal-content {
       width: 95%;
+      max-width: 400px;
       margin: 20px;
     }
     
@@ -2747,8 +3312,26 @@
       padding: 20px 20px 12px;
     }
     
+    .modal-header h2 {
+      font-size: 20px;
+    }
+    
     .modal-body {
       padding: 16px 20px 20px;
+    }
+    
+    .modal-body h3 {
+      font-size: 18px;
+    }
+    
+    .auth-input {
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+    
+    .auth-btn {
+      padding: 10px 16px;
+      font-size: 14px;
     }
     
     .auth-buttons {
@@ -2767,8 +3350,14 @@
       align-items: flex-end;
     }
     
-    .user-email {
-      max-width: 100px;
+    .user-name {
+      max-width: 80px;
+      font-size: 12px;
+    }
+    
+    .user-avatar {
+      width: 28px;
+      height: 28px;
       font-size: 12px;
     }
   }
@@ -2815,14 +3404,16 @@
       <div class="nav-r" style="display:flex;align-items:center;gap:0.75rem">
         <!-- Auth buttons -->
         <div id="authButtons" class="auth-buttons">
-          <button class="auth-nav-btn" onclick="showAccountModal()">Sign In</button>
-          <button class="auth-nav-btn primary" onclick="showAccountModal(); setTimeout(showSignupForm, 100)">Sign Up</button>
+          <button class="auth-nav-btn" onclick="showLoginFormModal()">Sign In</button>
+          <button class="auth-nav-btn primary" onclick="showSignupFormModal()">Sign Up</button>
         </div>
         
         <!-- User info (shown when logged in) -->
-        <div id="userInfo" class="user-info hidden">
-          <span id="userEmail" class="user-email"></span>
-          <button class="auth-nav-btn" onclick="signOut()">Sign Out</button>
+        <div id="userInfo" class="user-info hidden" onclick="showAccountSettings()">
+          <div class="user-avatar" id="userAvatar">
+            <span id="userInitial">?</span>
+          </div>
+          <span id="userName" class="user-name"></span>
         </div>
         
         <div style="cursor:pointer;position:relative" onclick="toggleNP()">
@@ -3258,6 +3849,7 @@
       
       <div id="signupForm" class="hidden">
         <h3>Sign Up</h3>
+        <input type="text" id="signupUsername" placeholder="Username" class="auth-input">
         <input type="email" id="signupEmail" placeholder="Email" class="auth-input">
         <input type="password" id="signupPassword" placeholder="Password" class="auth-input">
         <button class="auth-btn primary" onclick="signUpWithEmail()">Sign Up</button>
@@ -3276,6 +3868,71 @@
       </div>
       
       <button class="auth-btn secondary" onclick="hideAccountModal()">Continue without account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Account Settings Modal -->
+<div id="accountSettingsModal" class="modal" style="display: none;">
+  <div class="modal-content settings-modal">
+    <div class="modal-header">
+      <h2>Account Settings</h2>
+      <button class="close-btn" onclick="hideAccountSettings()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="settings-section">
+        <h3>Profile</h3>
+        <div class="profile-section">
+          <div class="profile-avatar-large" id="settingsAvatar" onclick="document.getElementById('avatarInput').click()">
+            <span id="settingsAvatarInitial">?</span>
+            <img id="settingsAvatarImg" style="display: none;">
+            <div class="avatar-overlay">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+          </div>
+          <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="uploadAvatar(this)">
+          <div class="profile-info">
+            <div class="profile-field">
+              <label>Username</label>
+              <input type="text" id="settingsUsername" class="auth-input" placeholder="Username">
+            </div>
+            <div class="profile-field">
+              <label>Email</label>
+              <input type="email" id="settingsEmail" class="auth-input" disabled>
+            </div>
+            <div class="profile-field">
+              <label>Bio</label>
+              <textarea id="settingsBio" class="auth-input" placeholder="Tell us about yourself (max 150 chars)" maxlength="150" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+        <button class="auth-btn primary" onclick="saveProfileSettings()">Save Profile</button>
+      </div>
+      
+      <div class="settings-section">
+        <h3>Change Password</h3>
+        <input type="password" id="currentPassword" placeholder="Current Password" class="auth-input">
+        <input type="password" id="newPassword" placeholder="New Password" class="auth-input">
+        <input type="password" id="confirmPassword" placeholder="Confirm New Password" class="auth-input">
+        <button class="auth-btn primary" onclick="changePassword()">Change Password</button>
+      </div>
+      
+      <div class="settings-section">
+        <h3>Sync Settings</h3>
+        <p class="settings-desc">Sync your watch history, list, and preferences across devices</p>
+        <button class="auth-btn primary" onclick="syncSettings()">Sync Now</button>
+      </div>
+      
+      <div class="settings-section danger">
+        <h3>Danger Zone</h3>
+        <button class="auth-btn danger" onclick="signOut()">Sign Out</button>
+        <button class="auth-btn danger" onclick="deleteAccount()">Delete Account</button>
+      </div>
     </div>
   </div>
 </div>
