@@ -4907,8 +4907,10 @@
     
     <script>
       // Initialize Supabase
+      console.log('Supabase config:', window.supabaseConfig);
       const { createClient } = window.supabase;
       const supabase = createClient(supabaseConfig.url, supabaseConfig.anonKey);
+      console.log('Supabase client initialized');
       
       // Account system
       let currentUser = null;
@@ -4926,31 +4928,31 @@
       }
       
       // Account Modal Functions
-      function showAccountModal() {
+      window.showAccountModal = function() {
         const modal = document.getElementById('accountModal');
         if (modal) {
           modal.style.display = 'flex';
           localStorage.setItem('hasSeenAccountPrompt', 'true');
         }
-      }
+      };
       
-      function hideAccountModal() {
+      window.hideAccountModal = function() {
         const modal = document.getElementById('accountModal');
         if (modal) modal.style.display = 'none';
-      }
+      };
       
-      function showSignupForm() {
+      window.showSignupForm = function() {
         document.getElementById('authForm').classList.add('hidden');
         document.getElementById('signupForm').classList.remove('hidden');
-      }
+      };
       
-      function showLoginForm() {
+      window.showLoginForm = function() {
         document.getElementById('signupForm').classList.add('hidden');
         document.getElementById('authForm').classList.remove('hidden');
-      }
+      };
       
       // Auth Functions
-      async function signInWithEmail() {
+      window.signInWithEmail = async function() {
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
         
@@ -4983,9 +4985,9 @@
           console.error('Sign in error:', err);
           toast('An error occurred. Please try again.');
         }
-      }
+      };
       
-      async function signUpWithEmail() {
+      window.signUpWithEmail = async function() {
         const email = document.getElementById('signupEmail').value.trim();
         const password = document.getElementById('signupPassword').value;
         
@@ -5021,9 +5023,9 @@
           console.error('Sign up error:', err);
           toast('An error occurred. Please try again.');
         }
-      }
+      };
       
-      async function signInWithGoogle() {
+      window.signInWithGoogle = async function() {
         try {
           const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
@@ -5039,9 +5041,9 @@
           console.error('Google sign in error:', err);
           toast('An error occurred. Please try again.');
         }
-      }
+      };
       
-      async function signOut() {
+      window.signOut = async function() {
         try {
           await supabase.auth.signOut();
           currentUser = null;
@@ -5051,11 +5053,13 @@
           console.error('Sign out error:', err);
           toast('An error occurred signing out');
         }
-      }
+      };
       
-      function updateAuthUI() {
+      window.updateAuthUI = function() {
         const authButtons = document.getElementById('authButtons');
         const userInfo = document.getElementById('userInfo');
+        
+        console.log('updateAuthUI called, currentUser:', currentUser);
         
         if (currentUser) {
           authButtons.classList.add('hidden');
@@ -5065,7 +5069,7 @@
           authButtons.classList.remove('hidden');
           userInfo.classList.add('hidden');
         }
-      }
+      };
       
       // Handle Google OAuth callback
       async function handleAuthCallback() {
