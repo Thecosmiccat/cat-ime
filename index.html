@@ -7,6 +7,218 @@
 <link rel="apple-touch-icon" sizes="152x152" href="icons/icon%20152.jpg">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/icon%20180.jpg">
 <link rel="apple-touch-icon" sizes="167x167" href="icons/icon%20167.jpg">
+
+<!-- Supabase Auth - Load in head for global accessibility -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+  // Initialize Supabase
+  console.log('Supabase config:', window.supabaseConfig);
+  const { createClient } = window.supabase;
+  const supabaseClient = createClient(supabaseConfig.url, supabaseConfig.anonKey);
+  console.log('Supabase client initialized');
+  
+  // Account system
+  let currentUser = null;
+  let hasSeenAccountPrompt = localStorage.getItem('hasSeenAccountPrompt');
+  
+  // Account Modal Functions
+  window.showAccountModal = function() {
+    const modal = document.getElementById('accountModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      localStorage.setItem('hasSeenAccountPrompt', 'true');
+    }
+  };
+  
+  window.hideAccountModal = function() {
+    const modal = document.getElementById('accountModal');
+    if (modal) modal.style.display = 'none';
+  };
+  
+  window.showSignupForm = function() {
+    document.getElementById('authForm').classList.add('hidden');
+    document.getElementById('signupForm').classList.remove('hidden');
+  };
+  
+  window.showLoginForm = function() {
+    document.getElementById('signupForm').classList.add('hidden');
+    document.getElementById('authForm').classList.remove('hidden');
+  };
+  
+  // Auth Functions
+  window.signInWithEmail = async function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+      toast('Please fill in all fields');
+      return;
+    }
+    
+    if (!email.includes('@')) {
+      toast('Please enter a valid email');
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        toast(error.message);
+      } else {
+        currentUser = data.user;
+        toast('Welcome back!');
+        hideAccountModal();
+        updateAuthUI();
+      }
+    } catch (err) {
+      console.error('Sign in error:', err);
+      toast('An error occurred. Please try again.');
+    }
+  };
+  
+  window.signUpWithEmail = async function() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    
+    if (!email || !password) {
+      toast('Please fill in all fields');
+      return;
+    }
+    
+    if (!email.includes('@')) {
+      toast('Please enter a valid email');
+      return;
+    }
+    
+    if (password.length < 6) {
+      toast('Password must be at least 6 characters');
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password
+      });
+      
+      if (error) {
+        toast(error.message);
+      } else {
+        toast('Check your email to confirm!');
+        hideAccountModal();
+      }
+    } catch (err) {
+      console.error('Sign up error:', err);
+      toast('An error occurred. Please try again.');
+    }
+  };
+  
+  window.signInWithGoogle = async function() {
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      
+      if (error) {
+        toast(error.message);
+      }
+    } catch (err) {
+      console.error('Google sign in error:', err);
+      toast('An error occurred. Please try again.');
+    }
+  };
+  
+  window.signOut = async function() {
+    try {
+      await supabaseClient.auth.signOut();
+      currentUser = null;
+      toast('Signed out');
+      updateAuthUI();
+    } catch (err) {
+      console.error('Sign out error:', err);
+      toast('An error occurred signing out');
+    }
+  };
+  
+  window.updateAuthUI = function() {
+    const authButtons = document.getElementById('authButtons');
+    const userInfo = document.getElementById('userInfo');
+    
+    console.log('updateAuthUI called, currentUser:', currentUser);
+    
+    if (currentUser) {
+      authButtons.classList.add('hidden');
+      userInfo.classList.remove('hidden');
+      document.getElementById('userEmail').textContent = currentUser.email;
+    } else {
+      authButtons.classList.remove('hidden');
+      userInfo.classList.add('hidden');
+    }
+  };
+  
+  // Check for existing session on load
+  async function checkAuthState() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    currentUser = session?.user || null;
+    
+    if (!hasSeenAccountPrompt && !currentUser) {
+      setTimeout(() => showAccountModal(), 2000);
+    }
+  }
+  
+  // Handle Google OAuth callback
+  async function handleAuthCallback() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const error = urlParams.get('error');
+    
+    if (error) {
+      toast('Authentication failed: ' + error);
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+    
+    if (code) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session?.user) {
+        currentUser = session.user;
+        toast('Welcome back!');
+        hideAccountModal();
+        updateAuthUI();
+      }
+    }
+  }
+  
+  // Listen for auth changes
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    console.log('Auth state changed:', event, session?.user?.email);
+    currentUser = session?.user || null;
+    updateAuthUI();
+    
+    if (event === 'SIGNED_IN' && session?.user) {
+      toast(`Welcome, ${session.user.email}!`);
+      hideAccountModal();
+    } else if (event === 'SIGNED_OUT') {
+      toast('Signed out');
+    }
+  });
+  
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', async () => {
+    await handleAuthCallback();
+    await checkAuthState();
+    updateAuthUI();
+  });
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap');
 
@@ -4899,225 +5111,6 @@
           requestAnimationFrame(draw);
         })();
       })();
-    </script>
-
-    <!-- Supabase Auth -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
-    
-    <script>
-      // Initialize Supabase
-      console.log('Supabase config:', window.supabaseConfig);
-      const { createClient } = window.supabase;
-      const supabase = createClient(supabaseConfig.url, supabaseConfig.anonKey);
-      console.log('Supabase client initialized');
-      
-      // Account system
-      let currentUser = null;
-      let hasSeenAccountPrompt = localStorage.getItem('hasSeenAccountPrompt');
-      
-      // Check for existing session on load
-      async function checkAuthState() {
-        const { data: { session } } = await supabase.auth.getSession();
-        currentUser = session?.user || null;
-        
-        // Show account prompt if first visit and no session
-        if (!hasSeenAccountPrompt && !currentUser) {
-          setTimeout(() => showAccountModal(), 2000);
-        }
-      }
-      
-      // Account Modal Functions
-      window.showAccountModal = function() {
-        const modal = document.getElementById('accountModal');
-        if (modal) {
-          modal.style.display = 'flex';
-          localStorage.setItem('hasSeenAccountPrompt', 'true');
-        }
-      };
-      
-      window.hideAccountModal = function() {
-        const modal = document.getElementById('accountModal');
-        if (modal) modal.style.display = 'none';
-      };
-      
-      window.showSignupForm = function() {
-        document.getElementById('authForm').classList.add('hidden');
-        document.getElementById('signupForm').classList.remove('hidden');
-      };
-      
-      window.showLoginForm = function() {
-        document.getElementById('signupForm').classList.add('hidden');
-        document.getElementById('authForm').classList.remove('hidden');
-      };
-      
-      // Auth Functions
-      window.signInWithEmail = async function() {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        
-        // Validation
-        if (!email || !password) {
-          toast('Please fill in all fields');
-          return;
-        }
-        
-        if (!email.includes('@')) {
-          toast('Please enter a valid email');
-          return;
-        }
-        
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password
-          });
-          
-          if (error) {
-            toast(error.message);
-          } else {
-            currentUser = data.user;
-            toast('Welcome back!');
-            hideAccountModal();
-            updateAuthUI();
-          }
-        } catch (err) {
-          console.error('Sign in error:', err);
-          toast('An error occurred. Please try again.');
-        }
-      };
-      
-      window.signUpWithEmail = async function() {
-        const email = document.getElementById('signupEmail').value.trim();
-        const password = document.getElementById('signupPassword').value;
-        
-        // Validation
-        if (!email || !password) {
-          toast('Please fill in all fields');
-          return;
-        }
-        
-        if (!email.includes('@')) {
-          toast('Please enter a valid email');
-          return;
-        }
-        
-        if (password.length < 6) {
-          toast('Password must be at least 6 characters');
-          return;
-        }
-        
-        try {
-          const { data, error } = await supabase.auth.signUp({
-            email,
-            password
-          });
-          
-          if (error) {
-            toast(error.message);
-          } else {
-            toast('Check your email to confirm!');
-            hideAccountModal();
-          }
-        } catch (err) {
-          console.error('Sign up error:', err);
-          toast('An error occurred. Please try again.');
-        }
-      };
-      
-      window.signInWithGoogle = async function() {
-        try {
-          const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-              redirectTo: window.location.origin
-            }
-          });
-          
-          if (error) {
-            toast(error.message);
-          }
-        } catch (err) {
-          console.error('Google sign in error:', err);
-          toast('An error occurred. Please try again.');
-        }
-      };
-      
-      window.signOut = async function() {
-        try {
-          await supabase.auth.signOut();
-          currentUser = null;
-          toast('Signed out');
-          updateAuthUI();
-        } catch (err) {
-          console.error('Sign out error:', err);
-          toast('An error occurred signing out');
-        }
-      };
-      
-      window.updateAuthUI = function() {
-        const authButtons = document.getElementById('authButtons');
-        const userInfo = document.getElementById('userInfo');
-        
-        console.log('updateAuthUI called, currentUser:', currentUser);
-        
-        if (currentUser) {
-          authButtons.classList.add('hidden');
-          userInfo.classList.remove('hidden');
-          document.getElementById('userEmail').textContent = currentUser.email;
-        } else {
-          authButtons.classList.remove('hidden');
-          userInfo.classList.add('hidden');
-        }
-      };
-      
-      // Handle Google OAuth callback
-      async function handleAuthCallback() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-        const error = urlParams.get('error');
-        
-        if (error) {
-          toast('Authentication failed: ' + error);
-          window.history.replaceState({}, document.title, window.location.pathname);
-          return;
-        }
-        
-        if (code) {
-          // Clear URL parameters
-          window.history.replaceState({}, document.title, window.location.pathname);
-          
-          // Get session after OAuth callback
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user) {
-            currentUser = session.user;
-            toast('Welcome back!');
-            hideAccountModal();
-            updateAuthUI();
-          }
-        }
-      }
-      
-      // Listen for auth changes
-      supabase.auth.onAuthStateChange((event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
-        currentUser = session?.user || null;
-        updateAuthUI();
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          toast(`Welcome, ${session.user.email}!`);
-          hideAccountModal();
-        } else if (event === 'SIGNED_OUT') {
-          toast('Signed out');
-        }
-      });
-      
-      // Initialize on page load
-      document.addEventListener('DOMContentLoaded', async () => {
-        await handleAuthCallback();
-        await checkAuthState();
-        updateAuthUI();
-      });
     </script>
 
     <!-- Yo is anyone acually reading this? -->
