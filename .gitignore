@@ -1,0 +1,13 @@
+# Supabase secrets
+supabase-config.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Node modules (if you ever add them)
+node_modules/
