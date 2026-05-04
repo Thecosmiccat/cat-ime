@@ -13,10 +13,19 @@
 <script src="supabase-config.js"></script>
 <script>
   // Initialize Supabase
-  console.log('Supabase config:', window.supabaseConfig);
-  const { createClient } = window.supabase;
-  const supabaseClient = createClient(supabaseConfig.url, supabaseConfig.anonKey);
-  console.log('Supabase client initialized');
+  let supabaseClient;
+  try {
+    console.log('Supabase config:', window.supabaseConfig);
+    if (!window.supabaseConfig || !window.supabaseConfig.url || !window.supabaseConfig.anonKey) {
+      throw new Error('Supabase config not loaded. Check supabase-config.js exists and is loaded correctly.');
+    }
+    const { createClient } = window.supabase;
+    supabaseClient = createClient(supabaseConfig.url, supabaseConfig.anonKey);
+    console.log('Supabase client initialized successfully');
+  } catch (err) {
+    console.error('Failed to initialize Supabase:', err);
+    alert('Authentication system failed to load. Please check console for details.');
+  }
   
   // Account system
   let currentUser = null;
@@ -66,8 +75,24 @@
   
   // Auth Functions
   window.signInWithEmail = async function() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
+    console.log('signInWithEmail called');
+    
+    const emailInput = document.getElementById('loginEmail');
+    const passwordInput = document.getElementById('loginPassword');
+    
+    console.log('Email input:', emailInput);
+    console.log('Password input:', passwordInput);
+    
+    if (!emailInput || !passwordInput) {
+      console.error('Form elements not found!');
+      toast('Form error. Please refresh the page.');
+      return;
+    }
+    
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    
+    console.log('Email:', email);
     
     if (!email || !password) {
       toast('Please fill in all fields');
@@ -80,10 +105,13 @@
     }
     
     try {
+      console.log('Calling Supabase signInWithPassword...');
       const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password
       });
+      
+      console.log('Sign in response:', { data, error });
       
       if (error) {
         toast(error.message);
