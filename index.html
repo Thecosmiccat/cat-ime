@@ -1,4 +1,5 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cat-ime">
@@ -219,7 +220,7 @@
           .from('profiles')
           .select('*')
           .eq('id', currentUser.id)
-          .single();
+          .maybeSingle();
         
         if (error) {
           console.error('Error fetching profile:', error);
@@ -519,28 +520,40 @@
     console.log('updateAuthUI called, currentUser:', currentUser);
     
     if (currentUser) {
+      // Hide auth buttons, show user info
       authButtons.classList.add('hidden');
       userInfo.classList.remove('hidden');
       
-      // Fetch profile data to get avatar
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('username, avatar_url')
-        .eq('id', currentUser.id)
-        .single();
-      
-      const username = profile?.username || currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || 'User';
-      const avatarUrl = profile?.avatar_url;
-      const initial = username.charAt(0).toUpperCase();
-      
-      document.getElementById('userName').textContent = username;
-      
-      // Update avatar display
-      const userAvatar = document.getElementById('userAvatar');
-      if (avatarUrl) {
-        userAvatar.innerHTML = `<img src="${avatarUrl}" alt="${username}" style="width: 100%; height: 100%; object-fit: cover;">`;
-      } else {
-        userAvatar.innerHTML = `<span id="userInitial">${initial}</span>`;
+      try {
+        // Fetch profile data to get avatar - use maybeSingle to avoid error if no profile
+        const { data: profile, error: profileError } = await supabaseClient
+          .from('profiles')
+          .select('username, avatar_url')
+          .eq('id', currentUser.id)
+          .maybeSingle();
+        
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+        }
+        
+        const username = profile?.username || currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || 'User';
+        const avatarUrl = profile?.avatar_url;
+        const initial = username.charAt(0).toUpperCase();
+        
+        document.getElementById('userName').textContent = username;
+        
+        // Update avatar display
+        const userAvatar = document.getElementById('userAvatar');
+        if (avatarUrl) {
+          userAvatar.innerHTML = `<img src="${avatarUrl}" alt="${username}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        } else {
+          userAvatar.innerHTML = `<span id="userInitial">${initial}</span>`;
+        }
+      } catch (err) {
+        console.error('Error updating auth UI:', err);
+        // Still show user info even if profile fetch fails
+        document.getElementById('userName').textContent = currentUser.email?.split('@')[0] || 'User';
+        document.getElementById('userAvatar').innerHTML = '<span id="userInitial">?</span>';
       }
     } else {
       authButtons.classList.remove('hidden');
@@ -578,11 +591,15 @@
         currentUser = session.user;
         
         // Ensure Google OAuth users have a profile
-        const { data: profile } = await supabaseClient
+        const { data: profile, error: profileError } = await supabaseClient
           .from('profiles')
           .select('username')
           .eq('id', session.user.id)
-          .single();
+          .maybeSingle();
+        
+        if (profileError) {
+          console.error('Profile check error:', profileError);
+        }
         
         if (!profile?.username) {
           const defaultUsername = session.user.email?.split('@')[0] || 'user';
@@ -617,11 +634,15 @@
     // Handle new sign-ins (especially Google OAuth users)
     if (event === 'SIGNED_IN' && session?.user) {
       // Check if user has a profile
-      const { data: profile } = await supabaseClient
+      const { data: profile, error: profileError } = await supabaseClient
         .from('profiles')
         .select('username')
         .eq('id', session.user.id)
-        .single();
+        .maybeSingle();
+      
+      if (profileError) {
+        console.error('Profile check error:', profileError);
+      }
       
       // If no profile or no username, create default
       if (!profile?.username) {
