@@ -565,6 +565,12 @@
     const userInfo = document.getElementById('userInfo');
     
     console.log('updateAuthUI called, currentUser:', currentUser);
+    console.log('DOM elements:', { authButtons, userInfo });
+    
+    if (!authButtons || !userInfo) {
+      console.error('Auth UI elements not found in DOM');
+      return;
+    }
     
     if (currentUser) {
       // Hide auth buttons, show user info
@@ -603,6 +609,7 @@
         document.getElementById('userAvatar').innerHTML = '<span id="userInitial">?</span>';
       }
     } else {
+      console.log('No currentUser, showing auth buttons');
       authButtons.classList.remove('hidden');
       userInfo.classList.add('hidden');
     }
@@ -610,7 +617,9 @@
   
   // Check for existing session on load
   async function checkAuthState() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
+    console.log('checkAuthState - getting session...');
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    console.log('checkAuthState - session:', session, 'error:', error);
     currentUser = session?.user || null;
     
     // Only show account prompt if user is NOT logged in and hasn't seen it
@@ -722,9 +731,13 @@
   
   // Initialize on page load
   document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOMContentLoaded - starting auth initialization');
     await handleAuthCallback();
+    console.log('After handleAuthCallback, currentUser:', currentUser);
     await checkAuthState();
+    console.log('After checkAuthState, currentUser:', currentUser);
     await updateAuthUI();
+    console.log('After updateAuthUI');
   });
 </script>
 <style>
