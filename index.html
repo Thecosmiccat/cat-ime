@@ -118,6 +118,10 @@
         toast(error.message);
       } else {
         currentUser = data.user;
+        console.log('Sign in successful, checking localStorage...');
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        console.log('Session after sign in:', session);
+        console.log('localStorage keys:', Object.keys(localStorage).filter(k => k.includes('supabase')));
         toast('Welcome back!');
         hideAccountModal();
         await updateAuthUI();
@@ -618,8 +622,12 @@
   // Check for existing session on load
   async function checkAuthState() {
     console.log('checkAuthState - getting session...');
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
-    console.log('checkAuthState - session:', session, 'error:', error);
+    const { data, error } = await supabaseClient.auth.getSession();
+    console.log('checkAuthState - full data:', data);
+    console.log('checkAuthState - error:', error);
+    const session = data?.session;
+    console.log('checkAuthState - session:', session);
+    console.log('checkAuthState - localStorage keys:', Object.keys(localStorage));
     currentUser = session?.user || null;
     
     // Only show account prompt if user is NOT logged in and hasn't seen it
