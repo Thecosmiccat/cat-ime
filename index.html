@@ -231,9 +231,16 @@
         const avatarUrl = profile?.avatar_url || currentUser.user_metadata?.avatar_url;
         const initial = username.charAt(0).toUpperCase();
         
-        document.getElementById('settingsUsername').value = username;
-        document.getElementById('settingsEmail').value = currentUser.email || '';
-        document.getElementById('settingsBio').value = bio;
+        const usernameInput = document.getElementById('settingsUsername');
+        const emailInput = document.getElementById('settingsEmail');
+        const bioInput = document.getElementById('settingsBio');
+        
+        console.log('Settings form elements:', { usernameInput, emailInput, bioInput });
+        console.log('Setting email to:', currentUser.email);
+        
+        if (usernameInput) usernameInput.value = username;
+        if (emailInput) emailInput.value = currentUser.email || '';
+        if (bioInput) bioInput.value = bio;
         
         // Set avatar display
         const avatarImg = document.getElementById('settingsAvatarImg');
@@ -258,27 +265,51 @@
   };
   
   window.saveProfileSettings = async function() {
-    const username = document.getElementById('settingsUsername').value.trim();
-    const bio = document.getElementById('settingsBio').value.trim();
+    console.log('saveProfileSettings called');
     
-    if (!username || username.length < 3) {
+    if (!currentUser) {
+      toast('You must be signed in to save profile');
+      return;
+    }
+    
+    const usernameInput = document.getElementById('settingsUsername');
+    const bioInput = document.getElementById('settingsBio');
+    
+    console.log('Form elements:', { usernameInput, bioInput });
+    
+    if (!usernameInput) {
+      toast('Form error: username field not found');
+      return;
+    }
+    
+    const username = usernameInput.value.trim();
+    const bio = bioInput ? bioInput.value.trim() : '';
+    
+    console.log('Form values:', { username, bio });
+    
+    if (!username) {
+      toast('Username is required');
+      return;
+    }
+    
+    if (username.length < 3) {
       toast('Username must be at least 3 characters');
       return;
     }
     
-    if (bio.length > 150) {
-      toast('Bio must be 150 characters or less');
-      return;
-    }
-    
     try {
+      toast('Saving profile...');
+      
       // Update user metadata
       const { data: userData, error: userError } = await supabaseClient.auth.updateUser({
         data: {
+          ...currentUser.user_metadata,
           username: username,
           bio: bio
         }
       });
+      
+      console.log('Update user response:', { userData, userError });
       
       if (userError) {
         toast(userError.message);
@@ -286,7 +317,7 @@
       }
       
       // Update profiles table
-      const { error: profileError } = await supabaseClient
+      const { data: profileData, error: profileError } = await supabaseClient
         .from('profiles')
         .upsert({
           id: currentUser.id,
@@ -295,9 +326,11 @@
           updated_at: new Date().toISOString()
         });
       
+      console.log('Profile upsert response:', { profileData, profileError });
+      
       if (profileError) {
         console.error('Profile table update error:', profileError);
-        toast('Error saving to profile table');
+        toast('Error saving to profile table: ' + profileError.message);
         return;
       }
       
@@ -306,7 +339,7 @@
       await updateAuthUI();
     } catch (err) {
       console.error('Profile update error:', err);
-      toast('An error occurred updating profile');
+      toast('An error occurred updating profile: ' + err.message);
     }
   };
   
@@ -314,6 +347,7 @@
     if (!input.files || !input.files[0]) return;
     
     const file = input.files[0];
+    console.log('Uploading file:', file.name, file.type, file.size);
     
     // Validate file type
     if (!file.type.startsWith('image/')) {
@@ -330,20 +364,29 @@
     try {
       toast('Uploading avatar...');
       
+      if (!currentUser) {
+        toast('You must be signed in to upload an avatar');
+        return;
+      }
+      
       // Upload to Supabase Storage
       const fileExt = file.name.split('.').pop();
       const filePath = `${currentUser.id}/avatar.${fileExt}`;
+      console.log('Uploading to path:', filePath);
       
-      const { error: uploadError } = await supabaseClient
+      const { data: uploadData, error: uploadError } = await supabaseClient
         .storage
         .from('avatars')
         .upload(filePath, file, {
-          upsert: true
+          upsert: true,
+          contentType: file.type
         });
+      
+      console.log('Upload response:', { uploadData, uploadError });
       
       if (uploadError) {
         console.error('Upload error:', uploadError);
-        toast('Error uploading avatar');
+        toast('Upload failed: ' + uploadError.message);
         return;
       }
       
@@ -353,8 +396,10 @@
         .from('avatars')
         .getPublicUrl(filePath);
       
+      console.log('Public URL:', publicUrl);
+      
       // Update profiles table with avatar URL
-      const { error: updateError } = await supabaseClient
+      const { data: updateData, error: updateError } = await supabaseClient
         .from('profiles')
         .upsert({
           id: currentUser.id,
@@ -362,9 +407,11 @@
           updated_at: new Date().toISOString()
         });
       
+      console.log('Profile update:', { updateData, updateError });
+      
       if (updateError) {
         console.error('Profile update error:', updateError);
-        toast('Error saving avatar URL');
+        toast('Error saving avatar URL: ' + updateError.message);
         return;
       }
       
@@ -382,7 +429,7 @@
       toast('Avatar updated!');
     } catch (err) {
       console.error('Avatar upload error:', err);
-      toast('An error occurred uploading avatar');
+      toast('An error occurred uploading avatar: ' + err.message);
     }
   };
   
