@@ -1,5 +1,6 @@
 // Supabase Configuration
+// Replace with your actual Supabase credentials
 window.supabaseConfig = {
-  url: 'https://vmnpuvyfyzdquetkakde.supabase.co',
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtbnB1dnlmeXpkcXVldGtha2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MTEyMTQsImV4cCI6MjA5MzQ4NzIxNH0.TSDvhcFFpVHNjw0UZVIfLPwVSHfoBZSksd0mrGgjncE'
+  url: 'YOUR_SUPABASE_URL',
+  anonKey: 'YOUR_SUPABASE_ANON_KEY'
 };

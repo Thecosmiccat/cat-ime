@@ -4331,17 +4331,36 @@
       function handleImport(input) {
         const file = input.files[0];
         if (!file) return;
-        
+
         const reader = new FileReader();
         reader.onload = function(e) {
           try {
             const data = JSON.parse(e.target.result);
+
+            // Validate imported data
+            if (!data || typeof data !== 'object') {
+              toast('Invalid backup file: not a valid object');
+              return;
+            }
+
+            // Check for required keys to ensure it's a valid backup
+            const hasValidKeys = Object.keys(data).some(key =>
+              key.startsWith('cw') || key.startsWith('w_') || key.startsWith('followed') || key.startsWith('stat_') || key.startsWith('pref_')
+            );
+
+            if (!hasValidKeys && Object.keys(data).length > 0) {
+              toast('Invalid backup file: unrecognized data format');
+              return;
+            }
+
             if (!confirm('This will overwrite your current data. Continue?')) return;
-            
+
             Object.keys(data).forEach(key => {
-              localStorage.setItem(key, data[key]);
+              if (typeof data[key] === 'string') {
+                localStorage.setItem(key, data[key]);
+              }
             });
-            
+
             toast('Data imported successfully!');
             location.reload();
           } catch (err) {
@@ -4359,7 +4378,7 @@
       let curSource = localStorage.getItem('pref_source') || 'animepahe';
       let curGenre = '';
       let loggedIn = false;
-
+      let countdownTimer = null;
       let pausedSrc = null;
       function goPage(id) {
         const iframe = document.querySelector('#playerBox iframe');
@@ -4395,6 +4414,11 @@
         t.style.animation = 'toastIn 0.22s ease forwards';
         clearTimeout(window._tt);
         window._tt = setTimeout(() => t.style.display = 'none', 2400);
+      }
+
+      function sanitizeHTML(str) {
+        if (typeof str !== 'string') return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
       }
 
       function markRead() {
@@ -4792,8 +4816,6 @@
         } catch (e) { }
       }
 
-      let countdownTimer = null;
-
       async function fetchAiringInfo(animeId) {
         const q = `query($id:Int){ Media(id:$id){ nextAiringEpisode { episode airingAt } } }`;
         try {
@@ -5060,17 +5082,18 @@
           if (d.data) {
             tbody.innerHTML = '';
             d.data.Page.media.forEach(m => {
-              const t = (m.title.english || m.title.romaji).replace(/'/g, "");
-              const obj = { id: m.id, malId: m.idMal, title: t, eps: m.episodes || 24, img: m.coverImage.large, dubbed: true };
+              const rawTitle = m.title.english || m.title.romaji || 'Unknown';
+              const t = sanitizeHTML(rawTitle);
+              const obj = { id: m.id, malId: m.idMal, title: rawTitle, eps: m.episodes || 24, img: m.coverImage.large, dubbed: true };
               const scoreStr = m.averageScore ? (m.averageScore / 10).toFixed(1) : '?';
               const savedStat = localStorage.getItem('stat_' + m.id) || 'sw';
               const w = JSON.parse(localStorage.getItem('w_' + m.id) || '[]');
               const opts = statuses.map(s => `<option value="${s.cls}" ${savedStat === s.cls ? 'selected' : ''}>${s.label}</option>`).join('');
 
-              tbody.innerHTML += `<tr><td class="tn" onclick='watchAnime(${JSON.stringify(obj).replace(/'/g, "&#39;")})'>${t}</td><td><select class="sb2 ${savedStat}" onchange="changeStat(${m.id}, this)" style="border:none;outline:none;cursor:pointer">${opts}</select></td><td style="color:var(--text2)">${w.length}/${obj.eps}</td><td style="color:var(--yellow)">★ ${scoreStr}</td><td><button class="lb" onclick="toggleFollowFor(${m.id}, this)">Unfollow</button></td></tr>`;
+              tbody.innerHTML += `<tr><td class="tn" onclick='watchAnime(${JSON.stringify(obj).replace(/</g, '\\u003c').replace(/>/g, '\\u003e')})'>${t}</td><td><select class="sb2 ${savedStat}" onchange="changeStat(${m.id}, this)" style="border:none;outline:none;cursor:pointer">${opts}</select></td><td style="color:var(--text2)">${w.length}/${obj.eps}</td><td style="color:var(--yellow)">★ ${scoreStr}</td><td><button class="lb" onclick="toggleFollowFor(${m.id}, this)">Unfollow</button></td></tr>`;
             });
           }
-        } catch (e) { }
+        } catch (e) { console.error('loadMyList error:', e); }
       }
 
       async function loadUpcomingCalendar() {
@@ -5105,12 +5128,13 @@
             const schedules = data.data.Page.airingSchedules.filter(s => s.media.format !== 'MOVIE' && !s.media.isAdult).slice(0, 20);
             grid.innerHTML = '';
             schedules.forEach(s => {
-              const t = s.media.title.english || s.media.title.romaji;
+              const rawTitle = s.media.title.english || s.media.title.romaji || 'Unknown';
+              const t = sanitizeHTML(rawTitle);
               const airingDate = new Date(s.airingAt * 1000);
               const timeStr = airingDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-              const obj = { id: s.media.id, malId: s.media.idMal, title: t.replace(/'/g, "\'"), eps: 24, dubbed: true, img: s.media.coverImage.large };
-              
-              grid.innerHTML += `<div class="calendar-item" onclick='watchAnime(${JSON.stringify(obj).replace(/'/g, "&#39;")})'>
+              const obj = { id: s.media.id, malId: s.media.idMal, title: rawTitle, eps: 24, dubbed: true, img: s.media.coverImage.large };
+
+              grid.innerHTML += `<div class="calendar-item" onclick='watchAnime(${JSON.stringify(obj).replace(/</g, '\\u003c').replace(/>/g, '\\u003e')})'>
                 <div class="calendar-thumb"><img src="${s.media.coverImage.large}" loading="lazy"></div>
                 <div class="calendar-info">
                   <div class="calendar-title" title="${t}">${t}</div>
@@ -5123,6 +5147,7 @@
             grid.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text3);font-size:0.82rem">No upcoming releases found for followed anime</div>';
           }
         } catch (e) {
+          console.error('loadUpcomingCalendar error:', e);
           grid.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text3);font-size:0.82rem">Error loading upcoming releases</div>';
         }
       }
@@ -5138,9 +5163,11 @@
 
       function buildEpList(a, epCount, epTitles = []) {
         const list = document.getElementById('epList');
+        if (!list) return;
         list.innerHTML = '';
         const total = epCount;
-        document.getElementById('epCnt').textContent = total + ' eps';
+        const epCntEl = document.getElementById('epCnt');
+        if (epCntEl) epCntEl.textContent = total + ' eps';
         const watched = new Set(JSON.parse(localStorage.getItem('w_' + a.id) || '[]'));
         for (let i = 1; i <= total; i++) {
           const item = document.createElement('div');
@@ -5148,14 +5175,15 @@
 
           let rawTitle = epTitles[i - 1] ? (epTitles[i - 1].title || '') : '';
           rawTitle = rawTitle.replace(/^Episode\s+\d+\s*[-:–]\s*/i, '').trim();
-          const epLabel = rawTitle || `Episode ${i}`;
-          
+          const epLabelRaw = rawTitle || `Episode ${i}`;
+          const epLabel = sanitizeHTML(epLabelRaw);
+
           const epN = i;
           item.innerHTML = `<div class="en">${String(i).padStart(2, '0')}</div><div class="ei"><div class="enm" title="${epLabel}">${epLabel}</div></div>${watched.has(i) ? '<div class="etick">✓</div>' : ''}`;
           item.onclick = () => {
             document.querySelectorAll('.epi').forEach(e => e.classList.remove('cur'));
             item.classList.add('cur');
-            loadPlayer(a.id, epN, epLabel, epN, total);
+            loadPlayer(a.id, epN, epLabelRaw, epN, total);
           };
           list.appendChild(item);
         }
@@ -5210,8 +5238,12 @@
 
       function loadPlayer(malId, epNum, epTitle, idx, total) {
         curEp = epNum;
-        document.getElementById('watchTitle').textContent = curAnime ? curAnime.title : 'Anime';
-        document.getElementById('watchMeta').textContent = `Episode ${idx} of ${total} · ${curDS.toUpperCase()}`;
+        const watchTitleEl = document.getElementById('watchTitle');
+        const watchMetaEl = document.getElementById('watchMeta');
+        const playerBoxEl = document.getElementById('playerBox');
+
+        if (watchTitleEl) watchTitleEl.textContent = curAnime ? curAnime.title : 'Anime';
+        if (watchMetaEl) watchMetaEl.textContent = `Episode ${idx} of ${total} · ${curDS.toUpperCase()}`;
 
         let url;
         // Temporarily disabled - sources are down
@@ -5229,15 +5261,17 @@
         */
         // Force animepahe for now
         url = `https://vidnest.fun/animepahe/${malId}/${epNum}/${curDS}`;
-        
-        document.getElementById('playerBox').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${epTitle}"></iframe>`;
+
+        if (playerBoxEl) {
+          playerBoxEl.innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none" title="${sanitizeHTML(epTitle)}"></iframe>`;
+        }
         markWatched(malId, epNum);
 
-        const epsList = document.getElementById('epList').children;
-        if (epsList[idx - 1]) {
-          epsList[idx - 1].classList.add('done', 'cur');
-          if (!epsList[idx - 1].querySelector('.etick')) {
-            epsList[idx - 1].innerHTML += `<div class="etick">✓</div>`;
+        const epsList = document.getElementById('epList');
+        if (epsList && epsList.children[idx - 1]) {
+          epsList.children[idx - 1].classList.add('done', 'cur');
+          if (!epsList.children[idx - 1].querySelector('.etick')) {
+            epsList.children[idx - 1].innerHTML += `<div class="etick">✓</div>`;
           }
         }
       }
@@ -5261,6 +5295,7 @@
       async function loadCW() {
         const cw = JSON.parse(localStorage.getItem('cw') || '[]');
         const scroll = document.getElementById('cwScroll');
+        if (!scroll) return;
         if (!cw.length) { scroll.innerHTML = '<div style="font-size:0.8rem;color:var(--text3);padding:1rem 0">No continue watching history available. Start watching some anime!</div>'; return; }
 
         const ids = cw.map(x => x.id);
@@ -5273,12 +5308,13 @@
             cw.forEach(item => {
               const m = d.data.Page.media.find(x => x.id === item.id);
               if (!m) return;
-              const t = (m.title.english || m.title.romaji).replace(/'/g, "");
+              const rawTitle = m.title.english || m.title.romaji || 'Unknown';
+              const t = sanitizeHTML(rawTitle);
               const total = m.episodes || 24;
               const pct = Math.min(100, (item.ep / total) * 100);
-              const obj = { id: m.id, malId: m.idMal, title: t, eps: total, img: m.coverImage.large, dubbed: true, score: m.averageScore ? (m.averageScore / 10).toFixed(1) : '?' };
+              const obj = { id: m.id, malId: m.idMal, title: rawTitle, eps: total, img: m.coverImage.large, dubbed: true, score: m.averageScore ? (m.averageScore / 10).toFixed(1) : '?' };
 
-              scroll.innerHTML += `<div class="cw-card" onclick='resumeAnime(${JSON.stringify(obj).replace(/'/g, "&#39;")}, ${item.ep})'>
+              scroll.innerHTML += `<div class="cw-card" onclick='resumeAnime(${JSON.stringify(obj).replace(/</g, '\\u003c').replace(/>/g, '\\u003e')}, ${item.ep})'>
              <div class="cw-thumb">
                <img src="${m.coverImage.large}">
                <div class="cw-rm" onclick="event.stopPropagation(); removeCW(${item.id})">×</div>
@@ -5291,7 +5327,7 @@
            </div>`;
             });
           }
-        } catch (e) { }
+        } catch (e) { console.error('loadCW error:', e); }
       }
 
       async function loadRecommendations() {
@@ -5453,6 +5489,7 @@
       let trendingLoading = false;
       let trendingHasNextPage = true;
       let trendingSeen = new Set();
+      let trendingObserver = null;
 
       function setTrendingStatus(msg) {
         const el = document.getElementById('homeTrendingStatus');
@@ -5496,7 +5533,9 @@
         const scroll = document.getElementById('trendingScroll');
         if (!scroll || typeof IntersectionObserver === 'undefined') return;
 
-        const observer = new IntersectionObserver(entries => {
+        if (trendingObserver) trendingObserver.disconnect();
+
+        trendingObserver = new IntersectionObserver(entries => {
           entries.forEach(entry => {
             if (entry.isIntersecting && !trendingLoading && trendingHasNextPage) {
               trendingPage += 1;
